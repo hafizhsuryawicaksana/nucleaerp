@@ -1,0 +1,465 @@
+<%- include('../partials/header', { title: 'Backward Decay Calculation Engine | Nuclea ERP - PT IMS' }) %>
+<%- include('../partials/sidebar', { page: 'calculation' }) %>
+
+<style>
+    /* ========================================================== */
+    /* CALCULATION ENGINE UI/UX (ENTERPRISE GRADE)                */
+    /* ========================================================== */
+    
+    .calc-input-group .input-group-text {
+        background-color: var(--kt-sidebar-bg);
+        color: var(--kt-text-muted);
+        font-weight: 700;
+        font-size: 0.8rem;
+        border-color: var(--kt-sidebar-border);
+    }
+    
+    .calc-input-group .form-control {
+        border-color: var(--kt-sidebar-border);
+        font-weight: 600;
+        color: var(--kt-text-dark);
+        background-color: var(--kt-card-bg);
+    }
+
+    .calc-input-group .form-control:focus {
+        border-color: var(--kt-primary-industrial);
+        box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
+    }
+
+    .result-card {
+        border: 1px solid var(--kt-sidebar-border);
+        border-radius: 12px;
+        padding: 1.5rem;
+        background: linear-gradient(180deg, var(--kt-card-bg) 0%, var(--kt-body-bg) 100%);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .result-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        background-color: var(--kt-sidebar-border);
+    }
+
+    .result-card.primary-result::before { background-color: var(--kt-primary-industrial); }
+    .result-card.danger-result::before { background-color: #dc3545; }
+    .result-card.info-result::before { background-color: #0dcaf0; }
+
+    .result-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 700;
+        color: var(--kt-text-muted);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .result-value {
+        font-size: 2.25rem;
+        font-weight: 800;
+        line-height: 1;
+        color: var(--kt-text-dark);
+        margin-bottom: 0.25rem;
+    }
+
+    .result-unit {
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--kt-text-muted);
+    }
+
+    .formula-box {
+        background-color: #f8f9fa;
+        border: 1px dashed #ced4da;
+        border-radius: 8px;
+        padding: 1rem;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9rem;
+    }
+
+    /* Dark Mode Overrides */
+    [data-bs-theme="dark"] .calc-input-group .input-group-text { background-color: #1e1e2d; border-color: #4b5675; }
+    [data-bs-theme="dark"] .calc-input-group .form-control { border-color: #4b5675; background-color: #151521; color: #fff; }
+    [data-bs-theme="dark"] .result-card { background: linear-gradient(180deg, #1e1e2d 0%, #151521 100%); border-color: #2b2b40; }
+    [data-bs-theme="dark"] .formula-box { background-color: #151521; border-color: #4b5675; color: #a1a5b7; }
+</style>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+
+    <main class="app-main">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Backward Decay Calculation Engine</h4>
+                <span class="text-muted small">Backward Decay & Radioactive Concentration (RAC) Physics Simulator</span>
+            </div>
+            <!-- Lencana 'alay' telah dihapus sepenuhnya -->
+        </div>
+
+        <div class="row g-4">
+            
+            <!-- LEFT COLUMN: INPUT PARAMETERS -->
+            <div class="col-xl-4">
+                <div class="card shadow-sm border-0 border-start border-primary border-4 hover-elevate h-100">
+                    <div class="card-header bg-transparent border-bottom py-3">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-sliders text-primary me-2"></i> Simulation Parameters</h6>
+                    </div>
+                    <div class="card-body p-4 bg-light">
+                        
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3 border-bottom pb-2" style="font-size: 0.7rem; letter-spacing: 1px;">1. Isotope & Physics</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">Radiopharmaceutical Isotope</label>
+                            <select class="form-select border-secondary fw-bold text-primary" id="isotopeSelect" onchange="calculatePhysics()">
+                                <option value="109.77" selected>18F-FDG (Fluorine-18)</option>
+                                <option value="20.38">11C (Carbon-11)</option>
+                                <option value="67.71">68Ga (Gallium-68)</option>
+                                <option value="360.0">99mTc (Technetium-99m)</option>
+                                <option value="9561.6">177Lu (Lutetium-177)</option>
+                                <option value="11548.8">131I (Iodine-131)</option>
+                                <option value="custom">-- Custom Isotope --</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-dark">Half-Life ($T_{1/2}$)</label>
+                            <div class="input-group input-group-sm calc-input-group">
+                                <input type="number" step="0.01" id="halfLifeInput" class="form-control text-end" value="109.77" readonly oninput="calculatePhysics()">
+                                <span class="input-group-text">Minutes</span>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3 border-bottom pb-2 mt-4" style="font-size: 0.7rem; letter-spacing: 1px;">2. Activity & Volume Demand</h6>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-bold text-dark">Target Activity ($A_t$)</label>
+                                <div class="input-group input-group-sm calc-input-group">
+                                    <input type="number" step="0.1" id="targetActivity" class="form-control text-end" value="400" oninput="calculatePhysics()">
+                                    <span class="input-group-text">mCi</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-bold text-dark">Total Volume ($V$)</label>
+                                <div class="input-group input-group-sm calc-input-group">
+                                    <input type="number" step="0.1" id="targetVolume" class="form-control text-end" value="15" oninput="calculatePhysics()">
+                                    <span class="input-group-text">mL</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-uppercase text-muted small mb-3 border-bottom pb-2 mt-4" style="font-size: 0.7rem; letter-spacing: 1px;">3. Absolute Timing Parameters</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-dark">End of Bombardment (EOB)</label>
+                            <input type="datetime-local" id="eobDateTime" class="form-control form-control-sm border-secondary" onchange="calculatePhysics()">
+                            <small class="text-muted" style="font-size: 0.65rem;">Production start time (reference time).</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-dark">Target Time (Dispatch/Inject)</label>
+                            <input type="datetime-local" id="targetDateTime" class="form-control form-control-sm border-secondary" onchange="calculatePhysics()">
+                            <small class="text-muted" style="font-size: 0.65rem;">Waktu target aktivitas yang diminta klien.</small>
+                        </div>
+
+                        <hr class="border-dashed my-4">
+                        
+                        <form action="/production/schedule" method="GET">
+                            <button type="submit" class="btn btn-dark fw-bold w-100 shadow-sm hover-elevate py-2">
+                                <i class="bi bi-calendar-check me-2 text-warning"></i> Push to Schedule
+                            </button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: DASHBOARD & CHART -->
+            <div class="col-xl-8 d-flex flex-column gap-4">
+                
+                <!-- KPI RESULT CARDS -->
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="result-card primary-result shadow-sm h-100">
+                            <span class="result-label"><i class="bi bi-bullseye text-primary me-1"></i> Req. EOB Activity ($A_0$)</span>
+                            <div class="result-value text-primary" id="resA0">0.00</div>
+                            <span class="result-unit">mCi</span>
+                            <div class="small text-muted mt-2 fw-medium border-top pt-2" id="resA0_GBq">0.00 GBq</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="result-card danger-result shadow-sm h-100">
+                            <span class="result-label"><i class="bi bi-droplet-half text-danger me-1"></i> EOB Concentration (RAC)</span>
+                            <div class="result-value text-danger" id="resRacEob">0.00</div>
+                            <span class="result-unit">mCi / mL</span>
+                            <div class="small text-muted mt-2 fw-medium border-top pt-2">Initial RAC at Synthesis End</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="result-card info-result shadow-sm h-100">
+                            <span class="result-label"><i class="bi bi-hourglass-split text-info me-1"></i> Target Concentration</span>
+                            <div class="result-value text-info" id="resRacTarget">0.00</div>
+                            <span class="result-unit">mCi / mL</span>
+                            <div class="small text-muted mt-2 fw-medium border-top pt-2">RAC upon Dispatch/Injection</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DECAY CURVE VISUALIZER -->
+                <div class="card shadow-sm border-0 hover-elevate flex-grow-1">
+                    <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-graph-down text-dark me-2"></i> Radioactive Decay Visualization</h6>
+                        
+                        <!-- Struktur HTML diperbaiki agar Javascript tidak merusak MathJax rendering -->
+                        <span class="badge bg-light text-muted border border-dashed">$\Delta t$: <span id="decayDeltaT_val">0</span> Mins</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="timeWarning" class="alert alert-danger d-none border-danger d-flex align-items-center p-3 mb-0">
+                            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                            <div>
+                                <h6 class="fw-bold mb-0">Invalid Time Sequence</h6>
+                                <span class="small">Target Time must be chronologically AFTER the End of Bombardment (EOB) Time.</span>
+                            </div>
+                        </div>
+                        
+                        <div style="height: 300px; width: 100%; position: relative;" id="chartContainer">
+                            <canvas id="decayChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FORMULA & CONSTANTS REFERENCE -->
+                <div class="card shadow-sm border-0 bg-light">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-lg-6 border-end-lg mb-3 mb-lg-0">
+                                <h6 class="fw-bold text-dark mb-2 small text-uppercase">Physics Formula</h6>
+                                <div class="formula-box text-center">
+                                    <h5 class="fw-bold text-primary mb-2">$$A_0 = \frac{A_t}{e^{-\lambda \cdot \Delta t}}$$</h5>
+                                    <span class="small text-muted">RAC ($C_v$) = $\frac{A_t}{V}$</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 ps-lg-4">
+                                <h6 class="fw-bold text-dark mb-3 small text-uppercase">Physics Constants</h6>
+                                <div class="row g-2 small">
+                                    <div class="col-6">
+                                        <span class="text-muted d-block">Decay Constant ($\lambda$)</span>
+                                        <strong class="text-dark fs-6" id="resLambda">0.000000</strong> <span class="text-muted">min⁻¹</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="text-muted d-block">Time Delta ($\Delta t$)</span>
+                                        <strong class="text-dark fs-6" id="resMins">0</strong> <span class="text-muted">mins</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="text-muted d-block">Decay Factor ($e^{-\lambda t}$)</span>
+                                        <strong class="text-dark fs-6" id="resDecayFactor">1.0000</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="text-muted d-block">Conversion</span>
+                                        <strong class="text-dark">1 mCi = 37 MBq</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let decayChartInstance = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const now = new Date();
+        const eob = new Date(now);
+        eob.setHours(4, 30, 0, 0); 
+        
+        const target = new Date(now);
+        target.setHours(8, 0, 0, 0); 
+        
+        const formatDT = (d) => {
+            const tzoffset = (new Date()).getTimezoneOffset() * 60000; 
+            const localISOTime = (new Date(d - tzoffset)).toISOString().slice(0, 16);
+            return localISOTime;
+        };
+
+        document.getElementById('eobDateTime').value = formatDT(eob);
+        document.getElementById('targetDateTime').value = formatDT(target);
+
+        setTimeout(() => {
+            calculatePhysics();
+        }, 500);
+    });
+
+    function calculatePhysics() {
+        const isotopeSelect = document.getElementById('isotopeSelect');
+        const hlInput = document.getElementById('halfLifeInput');
+        
+        if (isotopeSelect.value === 'custom') {
+            hlInput.readOnly = false;
+        } else {
+            hlInput.readOnly = true;
+            hlInput.value = isotopeSelect.value;
+        }
+
+        const halfLife = parseFloat(hlInput.value);
+        const targetActivity = parseFloat(document.getElementById('targetActivity').value);
+        const volume = parseFloat(document.getElementById('targetVolume').value);
+        const eobDate = new Date(document.getElementById('eobDateTime').value);
+        const targetDate = new Date(document.getElementById('targetDateTime').value);
+
+        if (!halfLife || !targetActivity || isNaN(eobDate) || isNaN(targetDate)) return;
+
+        const diffMs = targetDate - eobDate;
+        const diffMins = diffMs / 60000;
+
+        const warningEl = document.getElementById('timeWarning');
+        const chartEl = document.getElementById('chartContainer');
+
+        if (diffMins < 0) {
+            warningEl.classList.remove('d-none');
+            chartEl.style.opacity = '0.2';
+            resetOutputs();
+            return;
+        } else {
+            warningEl.classList.add('d-none');
+            chartEl.style.opacity = '1';
+        }
+
+        const lambda = Math.log(2) / halfLife;
+        const decayFactor = Math.exp(-lambda * diffMins);
+        
+        const requiredA0 = targetActivity / decayFactor;
+        
+        const racEob = volume > 0 ? (requiredA0 / volume) : 0;
+        const racTarget = volume > 0 ? (targetActivity / volume) : 0;
+
+        const reqA0GBq = (requiredA0 * 0.037);
+
+        animateValue('resA0', requiredA0.toFixed(2));
+        document.getElementById('resA0_GBq').innerText = reqA0GBq.toFixed(3) + ' GBq';
+        animateValue('resRacEob', racEob.toFixed(2));
+        animateValue('resRacTarget', racTarget.toFixed(2));
+        
+        document.getElementById('resLambda').innerText = lambda.toFixed(6);
+        document.getElementById('resMins').innerText = diffMins.toFixed(1);
+        
+        // Memperbarui hanya angka (span text), sehingga rumus $\Delta t$ dari MathJax tidak rusak/tertimpa
+        document.getElementById('decayDeltaT_val').innerText = diffMins.toFixed(1);
+        
+        document.getElementById('resDecayFactor').innerText = decayFactor.toFixed(4);
+
+        updateChart(requiredA0, targetActivity, halfLife, diffMins, lambda);
+    }
+
+    function resetOutputs() {
+        document.getElementById('resA0').innerText = '0.00';
+        document.getElementById('resA0_GBq').innerText = '0.00 GBq';
+        document.getElementById('resRacEob').innerText = '0.00';
+        document.getElementById('resRacTarget').innerText = '0.00';
+        document.getElementById('resLambda').innerText = '0.000000';
+        document.getElementById('resMins').innerText = '0';
+        document.getElementById('decayDeltaT_val').innerText = 'Error';
+        document.getElementById('resDecayFactor').innerText = '0.0000';
+    }
+
+    function animateValue(id, newValue) {
+        const obj = document.getElementById(id);
+        obj.innerText = newValue;
+        obj.style.opacity = '0.5';
+        setTimeout(() => { obj.style.opacity = '1'; }, 150);
+    }
+
+    function updateChart(A0, At, hl, diffMins, lambda) {
+        const ctx = document.getElementById('decayChart');
+        if (!ctx) return;
+
+        const labels = [];
+        const dataPoints = [];
+        
+        let step = diffMins / 20;
+        if (step === 0) step = 1;
+
+        for (let t = 0; t <= diffMins; t += step) {
+            labels.push(t.toFixed(0));
+            const currentA = A0 * Math.exp(-lambda * t);
+            dataPoints.push(currentA.toFixed(2));
+        }
+        
+        if (labels[labels.length - 1] !== diffMins.toFixed(0)) {
+            labels.push(diffMins.toFixed(0));
+            dataPoints.push(At.toFixed(2));
+        }
+
+        const isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        const gridColor = isDarkMode ? '#2b2b40' : '#eff2f5';
+        const textColor = isDarkMode ? '#a1a5b7' : '#4b5675';
+
+        if (decayChartInstance) {
+            decayChartInstance.destroy();
+        }
+
+        decayChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Activity (mCi)',
+                    data: dataPoints,
+                    borderColor: '#ffc107', 
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    borderWidth: 3,
+                    pointBackgroundColor: '#181C32',
+                    pointBorderColor: '#fff',
+                    pointRadius: 0, 
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.4 
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) { return `Activity: ${context.parsed.y} mCi`; },
+                            title: function(context) { return `Time: +${context[0].label} mins`; }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Time Elapsed (Minutes)', color: textColor },
+                        grid: { color: gridColor, drawBorder: false },
+                        ticks: { color: textColor, maxTicksLimit: 10 }
+                    },
+                    y: {
+                        title: { display: true, text: 'Activity (mCi)', color: textColor },
+                        grid: { color: gridColor, drawBorder: false },
+                        ticks: { color: textColor }
+                    }
+                },
+                interaction: { intersect: false, mode: 'index' }
+            }
+        });
+    }
+
+    const themeCheckbox = document.getElementById('themeToggleCheckbox');
+    if (themeCheckbox) {
+        themeCheckbox.addEventListener('change', () => {
+            setTimeout(calculatePhysics, 100); 
+        });
+    }
+</script>
+
+<%- include('../partials/footer') %>

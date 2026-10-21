@@ -1,0 +1,9 @@
+.env
+node_modules/
+logs/
+*.log
+.DS_Store
+Thumbs.db
+private_uploads/
+coverage/
+npm-debug.log*

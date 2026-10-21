@@ -1,0 +1,177 @@
+<%- include('../partials/header', { title: 'Delivery Tracking | Nuclea ERP - PT IMS' }) %>
+<%- include('../partials/sidebar', { page: 'tracking' }) %>
+
+<!-- Tambahan Library Peta InterActive (Leaflet.js) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    /* Sinkronisasi Peta ke Dark Mode */
+    [data-bs-theme="dark"] .leaflet-layer,
+    [data-bs-theme="dark"] .leaflet-control-zoom-in,
+    [data-bs-theme="dark"] .leaflet-control-zoom-out,
+    [data-bs-theme="dark"] .leaflet-control-attribution {
+        filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+    }
+</style>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+
+    <main class="app-main">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Live Delivery Command Center</h4>
+                <span class="text-muted small">Real-time logistics monitoring & GPS tracking of active dispatch</span>
+            </div>
+            <button class="btn btn-dark fw-bold shadow-sm px-4 hover-elevate">
+                <i class="bi bi-broadcast text-warning me-2"></i> Refresh Signal
+            </button>
+        </div>
+
+        <!-- AREA LIVE MAP GPS -->
+        <div class="card shadow-sm border-0 border-start border-primary border-4 mb-4 hover-elevate">
+            <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-map text-primary me-2"></i> Fleet GPS Radar</h6>
+                <span class="badge bg-success border text-white shadow-sm"><i class="bi bi-record-circle me-1"></i> Live Tracking Active</span>
+            </div>
+            <div class="card-body p-0">
+                <div id="liveMap" style="height: 400px; width: 100%; border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; z-index: 1;"></div>
+            </div>
+        </div>
+
+        <!-- KARTU STATUS PENGIRIMAN (MOBILE SIMULATOR) -->
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-truck text-muted me-2"></i> Active Fleet Status & Mobile Simulator</h5>
+        <div class="row g-4">
+            <% if (deliveries && deliveries.length > 0) { %>
+                <% deliveries.forEach(delivery => { %>
+                <div class="col-xl-6">
+                    <div class="card shadow-sm border-0 border-top border-warning border-4 hover-elevate h-100">
+                        <div class="card-header bg-light border-bottom py-3 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <span class="spinner-grow spinner-grow-sm text-warning me-2" role="status"></span>
+                                <h6 class="fw-bolder text-dark mb-0"><%= delivery.order_reference %></h6>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-white text-dark border shadow-sm"><i class="bi bi-shield-shaded me-1 text-primary"></i> <%= delivery.asset_code %></span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body p-4 d-flex flex-column justify-content-between">
+                            <div class="mb-4">
+                                <span class="d-block small text-muted fw-bold text-uppercase mb-1">Destination Facility</span>
+                                <h5 class="text-dark fw-bold mb-1"><i class="bi bi-hospital me-2 text-danger"></i> <%= delivery.hospital_name %></h5>
+                                <span class="small text-muted"><i class="bi bi-geo-alt-fill me-1"></i> GPS Coordinates: Lat -6.200, Long 106.816 (Simulated)</span>
+                            </div>
+
+                            <div class="position-relative py-3 mb-4">
+                                <div class="progress position-absolute" style="height: 4px; top: 31px; left: 12.5%; width: 75%; z-index: 1;">
+                                    <% 
+                                        let barWidth = '0%';
+                                        if(delivery.status === 'ARRIVED') barWidth = '33%';
+                                        if(delivery.status === 'INJECTED') barWidth = '66%';
+                                        if(delivery.status === 'RETURNING') barWidth = '100%';
+                                    %>
+                                    <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar" style="width: <%= barWidth %>;"></div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between position-relative" style="z-index: 2;">
+                                    <div class="text-center" style="width: 25%;">
+                                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto border border-4 border-white shadow-sm" style="width: 40px; height: 40px;"><i class="bi bi-truck fs-6"></i></div>
+                                        <div class="mt-2 fw-bold text-dark" style="font-size: 0.7rem;">Departed</div>
+                                    </div>
+                                    <div class="text-center" style="width: 25%;">
+                                        <div class="<%= delivery.status === 'IN_TRANSIT' ? 'bg-light text-muted' : 'bg-primary text-white' %> rounded-circle d-flex align-items-center justify-content-center mx-auto border border-4 border-white shadow-sm" style="width: 40px; height: 40px; transition: 0.3s;"><i class="bi bi-geo-alt fs-6"></i></div>
+                                        <div class="mt-2 fw-bold <%= delivery.status === 'IN_TRANSIT' ? 'text-muted' : 'text-dark' %>" style="font-size: 0.7rem;">Arrived</div>
+                                    </div>
+                                    <div class="text-center" style="width: 25%;">
+                                        <div class="<%= ['IN_TRANSIT', 'ARRIVED'].includes(delivery.status) ? 'bg-light text-muted' : 'bg-primary text-white' %> rounded-circle d-flex align-items-center justify-content-center mx-auto border border-4 border-white shadow-sm" style="width: 40px; height: 40px; transition: 0.3s;"><i class="bi bi-bandaid fs-6"></i></div>
+                                        <div class="mt-2 fw-bold <%= ['IN_TRANSIT', 'ARRIVED'].includes(delivery.status) ? 'text-muted' : 'text-dark' %>" style="font-size: 0.7rem;">Injected</div>
+                                    </div>
+                                    <div class="text-center" style="width: 25%;">
+                                        <div class="<%= delivery.status === 'RETURNING' ? 'bg-primary text-white' : 'bg-light text-muted' %> rounded-circle d-flex align-items-center justify-content-center mx-auto border border-4 border-white shadow-sm" style="width: 40px; height: 40px; transition: 0.3s;"><i class="bi bi-arrow-return-left fs-6"></i></div>
+                                        <div class="mt-2 fw-bold <%= delivery.status === 'RETURNING' ? 'text-dark' : 'text-muted' %>" style="font-size: 0.7rem;">Returning</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-dark bg-opacity-10 p-3 rounded border border-secondary border-opacity-25">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-phone-vibrate text-dark fs-5 me-2"></i>
+                                    <h6 class="mb-0 fw-bold text-dark small text-uppercase">Driver App Simulator</h6>
+                                </div>
+                                <form action="/scm/tracking/update/<%= delivery.id %>" method="POST">
+                                    <% if(delivery.status === 'IN_TRANSIT') { %>
+                                        <input type="hidden" name="next_status" value="ARRIVED">
+                                        <button type="submit" class="btn btn-primary fw-bold w-100 shadow-sm"><i class="bi bi-geo-alt-fill me-1"></i> LOG ARRIVAL AT RS</button>
+                                    <% } else if(delivery.status === 'ARRIVED') { %>
+                                        <input type="hidden" name="next_status" value="INJECTED">
+                                        <button type="submit" class="btn btn-warning fw-bold text-dark w-100 shadow-sm"><i class="bi bi-bandaid-fill me-1"></i> DOSE INJECTED</button>
+                                    <% } else if(delivery.status === 'INJECTED') { %>
+                                        <input type="hidden" name="next_status" value="RETURNING">
+                                        <button type="submit" class="btn btn-info fw-bold text-white w-100 shadow-sm"><i class="bi bi-sign-turn-left-fill me-1"></i> RETURNING TO IMS</button>
+                                    <% } else if(delivery.status === 'RETURNING') { %>
+                                        <input type="hidden" name="next_status" value="COMPLETED">
+                                        <button type="submit" class="btn btn-success fw-bold w-100 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> ASSET CHECK-IN (FACILITY)</button>
+                                    <% } %>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            <% } else { %>
+                <div class="col-12">
+                    <div class="card shadow-sm border border-dashed bg-transparent">
+                        <div class="card-body p-5 text-center text-muted">
+                            <i class="bi bi-shield-check fs-1 d-block mb-3 text-success opacity-50"></i>
+                            <h5 class="fw-bold">No Active Deliveries on the Road</h5>
+                            <p class="small">All fleets are currently on standby at the IMS Facility. Radar clear.</p>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </main>
+</div>
+
+<!-- Logika Leaflet Map (Peta Digital) -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Koordinat pusat (Misal: Fasilitas PT IMS / Jakarta Area)
+        var map = L.map('liveMap').setView([-6.2088, 106.8456], 11);
+
+        // Render Peta dari OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors',
+            maxZoom: 18,
+        }).addTo(map);
+
+        // Ikon Khusus untuk Markas / Fasilitas
+        var facilityIcon = L.divIcon({
+            html: '<div style="background-color:#181C32; width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>',
+            className: '', iconSize: [20, 20], iconAnchor: [10, 10]
+        });
+        L.marker([-6.2088, 106.8456], {icon: facilityIcon}).addTo(map).bindPopup('<b>PT IMS Facility</b><br>Main Hub').openPopup();
+
+        // Simulasi Titik Kendaraan (Dummy Coordinates untuk contoh visual)
+        var carIcon = L.divIcon({
+            html: '<div style="background-color:#ffc107; font-size:18px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);">🚚</div>',
+            className: '', iconSize: [30, 30], iconAnchor: [15, 15]
+        });
+
+        // Loop untuk menambahkan marker jika ada pengiriman (simulasi lokasi)
+        <% if (deliveries && deliveries.length > 0) { %>
+            <% deliveries.forEach((del, index) => { %>
+                // Menggeser lokasi sedikit agar tidak menumpuk
+                var lat = -6.2088 + (Math.random() * 0.05 * (Math.random() > 0.5 ? 1 : -1));
+                var lng = 106.8456 + (Math.random() * 0.05 * (Math.random() > 0.5 ? 1 : -1));
+                
+                L.marker([lat, lng], {icon: carIcon}).addTo(map)
+                 .bindPopup('<b>Order: <%= del.order_reference %></b><br>To: <%= del.hospital_name %><br>Asset: <%= del.asset_code %>');
+            <% }) %>
+        <% } %>
+    });
+</script>
+
+<%- include('../partials/footer') %>

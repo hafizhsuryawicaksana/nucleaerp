@@ -1,0 +1,356 @@
+<%- include('../partials/header', { title: 'Product Distribution | Nuclea ERP' }) %>
+<%- include('../partials/sidebar', { page: 'distribution' }) %>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+    /* Sinkronisasi Peta ke Dark Mode */
+    [data-bs-theme="dark"] .leaflet-layer, [data-bs-theme="dark"] .leaflet-control-zoom-in, [data-bs-theme="dark"] .leaflet-control-zoom-out, [data-bs-theme="dark"] .leaflet-control-attribution { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+    
+    /* Accordion Table Styling */
+    .table-accordion tbody tr.main-row { cursor: pointer; transition: background-color 0.2s; }
+    .table-accordion tbody tr.main-row:hover { background-color: var(--kt-sidebar-border); }
+    .table-accordion tbody tr.detail-row { display: none; background-color: rgba(0,0,0,0.015); }
+    [data-bs-theme="dark"] .table-accordion tbody tr.detail-row { background-color: rgba(255,255,255,0.02); }
+    .table-accordion tbody tr.detail-row.show { display: table-row; animation: fadeIn 0.3s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .toggle-icon { transition: transform 0.3s ease; }
+    .main-row.expanded .toggle-icon { transform: rotate(180deg); }
+
+    .status-timeline { position: relative; padding: 1rem 0; }
+    .status-line { position: absolute; height: 4px; background: var(--kt-sidebar-border); top: 31px; left: 12.5%; width: 75%; z-index: 1; }
+    .status-step { width: 25%; text-align: center; position: relative; z-index: 2; }
+    .status-icon { width: 40px; height: 40px; margin: 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 4px solid var(--kt-card-bg); transition: 0.3s; }
+</style>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+    
+    <main class="app-main">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Product Distribution & Logistics</h4>
+                <span class="text-muted small">Based on SOP IMS.SC.007 & Customer Database (Lampiran 1 & 3)</span>
+            </div>
+            <button class="btn btn-outline-dark fw-bold shadow-sm bg-white" onclick="window.open('/ims-sc-007-route-map.pdf', '_blank')">
+                <i class="bi bi-map text-primary me-2"></i> View Distribution Map
+            </button>
+        </div>
+
+        <ul class="nav nav-pills mb-4" id="distributionTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold" data-bs-toggle="pill" data-bs-target="#tab-dispatch" type="button" role="tab">
+                    <i class="bi bi-box-seam me-2"></i> 1. Ready for Dispatch (F-02 & F-03)
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold" data-bs-toggle="pill" data-bs-target="#tab-tracking" type="button" role="tab">
+                    <i class="bi bi-broadcast me-2"></i> 2. Live Tracking & Fleet Radar
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="distributionTabsContent">
+            
+            <!-- TAB 1: READY FOR DISPATCH -->
+            <div class="tab-pane fade show active" id="tab-dispatch" role="tabpanel">
+                <div class="card shadow-sm border-0 hover-elevate">
+                    <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam text-primary me-2"></i> Batches Awaiting Dispatch</h6>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">Click row to view customers</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0 table-accordion">
+                                <thead class="bg-light text-muted small text-uppercase">
+                                    <tr>
+                                        <th style="width: 50px;" class="text-center"></th>
+                                        <th class="ps-3">Source Batch (Prod)</th>
+                                        <th>Product Type</th>
+                                        <th>QA Release Date</th>
+                                        <th class="text-end pe-4">Total Destinations</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="main-row" onclick="toggleDetails('batch-1', this)">
+                                        <td class="text-center"><i class="bi bi-chevron-down toggle-icon text-muted"></i></td>
+                                        <td class="ps-3 fw-bold text-dark fs-6">BATCH-260901</td>
+                                        <td><span class="badge bg-light text-dark border shadow-sm">Commercial 18F-FDG</span></td>
+                                        <td class="text-muted small"><i class="bi bi-check-circle text-success me-1"></i> 26 Sep 2026, 04:30 WIB</td>
+                                        <td class="text-end pe-4 fw-bold text-primary">2 Hospitals</td>
+                                    </tr>
+                                    <tr class="detail-row" id="batch-1">
+                                        <td colspan="5" class="p-0 border-0">
+                                            <div class="p-4 bg-light border-bottom border-top" style="box-shadow: inset 0 3px 6px rgba(0,0,0,0.03);">
+                                                <h6 class="fw-bold text-dark text-uppercase small mb-3 border-bottom pb-2" style="letter-spacing: 0.5px;">Customer Delivery Allocation (DO)</h6>
+                                                <table class="table table-sm mb-0 align-middle bg-white border rounded shadow-sm">
+                                                    <thead class="text-muted small text-uppercase bg-light border-bottom">
+                                                        <tr>
+                                                            <th class="ps-4 py-2">Customer (per Appendix 1)</th>
+                                                            <th>Rute Distribusi</th>
+                                                            <th>Requested Target</th>
+                                                            <th>Shielding (Kontainer)</th>
+                                                            <th class="text-end pe-4 py-2">Delivery Process</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="ps-4 fw-bold text-dark py-3"><i class="bi bi-arrow-return-right text-muted me-2"></i>RS Mitra Plumbon, Cirebon</td>
+                                                            <td class="py-3"><span class="badge bg-warning text-dark px-2 py-1"><i class="bi bi-geo-alt"></i> Rute 3 (Jawa Barat)</span></td>
+                                                            <td class="py-3"><span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-2 py-1 fs-7">400 mCi</span></td>
+                                                            <td class="py-3">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="bg-secondary bg-opacity-10 rounded p-1 me-2"><i class="bi bi-shield-shaded text-dark"></i></div>
+                                                                    <span class="fw-bold text-dark small">LP-012</span>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-end pe-4 py-3">
+                                                                <button class="btn btn-sm btn-dark fw-bold shadow-sm hover-elevate" data-bs-toggle="modal" data-bs-target="#processDispatchModal" onclick="setDispatchData('RS Mitra Plumbon', 'Rute 3 (Jawa Barat)', '400', 'LP-012', 'BATCH-260901')">
+                                                                    <i class="bi bi-file-earmark-text text-warning me-1"></i> F-01 & F-03
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="ps-4 fw-bold text-dark py-3"><i class="bi bi-arrow-return-right text-muted me-2"></i>RS Kariadi, Semarang</td>
+                                                            <td class="py-3"><span class="badge bg-info text-dark px-2 py-1"><i class="bi bi-geo-alt"></i> Rute 1 (Jateng & DIY)</span></td>
+                                                            <td class="py-3"><span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-2 py-1 fs-7">350 mCi</span></td>
+                                                            <td class="py-3">
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="bg-secondary bg-opacity-10 rounded p-1 me-2"><i class="bi bi-shield-shaded text-dark"></i></div>
+                                                                    <span class="fw-bold text-dark small">LP-005</span>
+                                                                </div>
+                                                            </td>
+                                                            <td class="text-end pe-4 py-3">
+                                                                <button class="btn btn-sm btn-dark fw-bold shadow-sm hover-elevate" data-bs-toggle="modal" data-bs-target="#processDispatchModal" onclick="setDispatchData('RS Kariadi', 'Rute 1 (Jateng & DIY)', '350', 'LP-005', 'BATCH-260901')">
+                                                                    <i class="bi bi-file-earmark-text text-warning me-1"></i> F-01 & F-03
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: LIVE TRACKING -->
+            <div class="tab-pane fade" id="tab-tracking" role="tabpanel">
+                <div class="card shadow-sm border-0 border-start border-primary border-4 mb-4 hover-elevate">
+                    <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-geo-alt-fill text-primary me-2"></i> Real-Time Telematics & Routing</h6>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success shadow-sm px-3 py-2"><i class="bi bi-broadcast me-1"></i> GPS Linked</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div id="liveMap" style="height: 400px; width: 100%; border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; z-index: 1;"></div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-end mb-3 mt-5">
+                    <h6 class="fw-bold text-dark m-0 text-uppercase small" style="letter-spacing: 0.5px;">Active Outbound Deliveries</h6>
+                </div>
+                
+                <div class="row g-4">
+                    <% if (deliveries && deliveries.length > 0) { %>
+                        <% deliveries.forEach(del => { %>
+                        <div class="col-xl-6">
+                            <div class="card shadow-sm border-0 border-top border-warning border-4 hover-elevate h-100 bg-white">
+                                <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+                                    <div class="d-flex align-items-center">
+                                        <div class="spinner-grow spinner-grow-sm text-warning me-3" role="status"></div>
+                                        <div>
+                                            <h6 class="fw-bolder text-dark mb-0 fs-5"><%= del.order_reference %></h6>
+                                            <span class="small text-muted fw-bold"><%= del.hospital_name %></span>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-light text-dark border shadow-sm px-3 py-2 fs-7"><i class="bi bi-shield-shaded me-1 text-primary"></i> <%= del.asset_code %></span>
+                                </div>
+                                <div class="card-body p-4">
+                                    <div class="status-timeline mb-4">
+                                        <div class="status-line">
+                                            <% 
+                                                let bar = '0%';
+                                                if(del.status === 'ARRIVED') bar = '33%';
+                                                if(del.status === 'INJECTED') bar = '66%';
+                                                if(del.status === 'COMPLETED') bar = '100%';
+                                            %>
+                                            <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" style="width: <%= bar %>;"></div>
+                                        </div>
+                                        <div class="d-flex justify-content-between position-relative" style="z-index: 2;">
+                                            <div class="status-step">
+                                                <div class="status-icon bg-primary text-white shadow-sm"><i class="bi bi-truck fs-6"></i></div>
+                                                <div class="mt-2 fw-bold text-dark" style="font-size: 0.7rem;">Departed</div>
+                                            </div>
+                                            <div class="status-step">
+                                                <div class="status-icon <%= del.status !== 'IN_TRANSIT' ? 'bg-primary text-white' : 'bg-light text-muted' %> shadow-sm"><i class="bi bi-geo-alt fs-6"></i></div>
+                                                <div class="mt-2 fw-bold <%= del.status !== 'IN_TRANSIT' ? 'text-dark' : 'text-muted' %>" style="font-size: 0.7rem;">Arrived</div>
+                                            </div>
+                                            <div class="status-step">
+                                                <div class="status-icon <%= ['INJECTED', 'COMPLETED'].includes(del.status) ? 'bg-primary text-white' : 'bg-light text-muted' %> shadow-sm"><i class="bi bi-bandaid fs-6"></i></div>
+                                                <div class="mt-2 fw-bold <%= ['INJECTED', 'COMPLETED'].includes(del.status) ? 'text-dark' : 'text-muted' %>" style="font-size: 0.7rem;">Injected</div>
+                                            </div>
+                                            <div class="status-step">
+                                                <div class="status-icon <%= del.status === 'COMPLETED' ? 'bg-success text-white' : 'bg-light text-muted' %> shadow-sm"><i class="bi bi-arrow-return-left fs-6"></i></div>
+                                                <div class="mt-2 fw-bold <%= del.status === 'COMPLETED' ? 'text-success' : 'text-muted' %>" style="font-size: 0.7rem;">Reverse Log.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <form action="/scm/tracking/update/<%= del.id %>" method="POST" class="mt-3 border-top pt-3">
+                                        <% if(del.status === 'IN_TRANSIT') { %>
+                                            <input type="hidden" name="next_status" value="ARRIVED">
+                                            <button type="submit" class="btn btn-warning w-100 fw-bold text-dark"><i class="bi bi-geo-alt"></i> Set Arrived at RS</button>
+                                        <% } else if(del.status === 'ARRIVED') { %>
+                                            <input type="hidden" name="next_status" value="INJECTED">
+                                            <button type="submit" class="btn btn-primary w-100 fw-bold"><i class="bi bi-bandaid"></i> Confirm Injection</button>
+                                        <% } else if(del.status === 'INJECTED') { %>
+                                            <input type="hidden" name="next_status" value="COMPLETED">
+                                            <button type="submit" class="btn btn-info text-white w-100 fw-bold"><i class="bi bi-arrow-return-left"></i> Return Shielding (IMS.SC.008)</button>
+                                        <% } %>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="col-12"><div class="alert alert-light border text-center py-4 text-muted"><i class="bi bi-inbox fs-2 d-block mb-2"></i>No active deliveries.</div></div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL: PRE-FLIGHT DISPATCH & DOCUMENTATION -->
+<div class="modal fade" id="processDispatchModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white py-3">
+                <h5 class="modal-title fw-bold"><i class="bi bi-truck text-warning me-2"></i> Pre-Flight Dispatch (SOP IMS.SC.007)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/scm/distribution/start" method="POST">
+                <div class="modal-body p-0 bg-light">
+                    
+                    <ul class="nav nav-tabs bg-white px-4 pt-3 border-bottom" role="tablist">
+                        <li class="nav-item"><button class="nav-link active fw-bold text-dark" data-bs-toggle="tab" data-bs-target="#step1" type="button">1. Checklist Armada (F-01)</button></li>
+                        <li class="nav-item"><button class="nav-link fw-bold text-dark" data-bs-toggle="tab" data-bs-target="#step2" type="button">2. Serah Terima Internal (F-02)</button></li>
+                        <li class="nav-item"><button class="nav-link fw-bold text-dark" data-bs-toggle="tab" data-bs-target="#step3" type="button">3. Surat Jalan Pengiriman (F-03)</button></li>
+                    </ul>
+
+                    <div class="tab-content p-4">
+                        
+                        <!-- STEP 1: F-01 Checklist Armada -->
+                        <div class="tab-pane fade show active" id="step1">
+                            <h6 class="fw-bold text-dark mb-3">Checklist Pemeriksaan Armada Transportasi (IMS.SC.007-F-01)</h6>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6"><label class="form-label small fw-bold text-muted">Nama Pengemudi / Kurir</label><input type="text" name="driver_name" class="form-control border-secondary" required></div>
+                                <div class="col-md-6"><label class="form-label small fw-bold text-muted">Vehicle Plate Number</label><input type="text" name="vehicle_plate" class="form-control border-secondary" placeholder="e.g. B 1234 XYZ" required></div>
+                            </div>
+                            <div class="table-responsive bg-white rounded border">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead class="bg-light small"><tr><th>Parameter Pemeriksaan Fisik & Keselamatan</th><th class="text-center">Baik</th></tr></thead>
+                                    <tbody class="small">
+                                        <tr><td>Fungsi rem, lampu, dan tekanan ban memadai</td><td class="text-center"><input type="checkbox" class="form-check-input border-secondary" required></td></tr>
+                                        <tr><td>Sistem pendingin udara kabin & kargo berfungsi</td><td class="text-center"><input type="checkbox" class="form-check-input border-secondary" required></td></tr>
+                                        <tr><td>Perangkat pelacak GPS Active</td><td class="text-center"><input type="checkbox" class="form-check-input border-secondary" required></td></tr>
+                                        <tr><td>Peralatan penanganan tumpahan radiasi (Spill Kit) lengkap</td><td class="text-center"><input type="checkbox" class="form-check-input border-secondary" required></td></tr>
+                                        <tr><td>Dosimeter saku dipakai oleh kurir</td><td class="text-center"><input type="checkbox" class="form-check-input border-secondary" required></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- STEP 2: F-02 Serah Terima Internal -->
+                        <div class="tab-pane fade" id="step2">
+                            <h6 class="fw-bold text-dark mb-3">Verifikasi Fisik & Kemasan (IMS.SC.007-F-02)</h6>
+                            <div class="alert alert-warning small"><i class="bi bi-exclamation-triangle"></i> Verifikasi silang dilakukan antara QA/QC dan SCM.</div>
+                            <div class="table-responsive bg-white rounded border">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead class="bg-light small"><tr><th>Parameter Verifikasi QA ke SCM</th><th class="text-center">Sesuai</th></tr></thead>
+                                    <tbody class="small">
+                                        <tr><td>Product berada dalam kontainer pelindung radiasi utama</td><td class="text-center"><input type="checkbox" class="form-check-input border-secondary" required></td></tr>
+                                        <tr><td>Fisik kemasan pelindung tidak cacat</td><td class="text-center"><input type="checkbox" class="form-check-input border-secondary" required></td></tr>
+                                        <tr><td>Tutup wadah terpasang rapat dan segel utuh</td><td class="text-center"><input type="checkbox" class="form-check-input border-secondary" required></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- STEP 3: F-03 Surat Jalan -->
+                        <div class="tab-pane fade" id="step3">
+                            <h6 class="fw-bold text-dark mb-3">Product Delivery Note (IMS.SC.007-F-03)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6"><label class="form-label small fw-bold text-muted">Delivery Customer</label><input type="text" id="modalCustomerName" name="hospital_name" class="form-control bg-white fw-bold text-dark border-secondary" readonly></div>
+                                <div class="col-md-6"><label class="form-label small fw-bold text-muted">Rute Distribusi</label><input type="text" id="modalRoute" class="form-control bg-light border-secondary" readonly></div>
+                                <div class="col-md-4"><label class="form-label small fw-bold text-muted">Production Batch</label><input type="text" id="modalBatchId" name="production_batch_id" class="form-control bg-light border-secondary" readonly></div>
+                                <div class="col-md-4"><label class="form-label small fw-bold text-muted">Aktivitas Pesanan (mCi)</label><input type="text" id="modalTargetAct" name="allocated_mci" class="form-control bg-light border-secondary" readonly></div>
+                                <div class="col-md-4"><label class="form-label small fw-bold text-muted">Kontainer Digunakan</label><input type="text" id="modalLeadpot" name="asset_code" class="form-control bg-light border-secondary" readonly></div>
+                                
+                                <div class="col-12 mt-4">
+                                    <h6 class="fw-bold text-dark mb-2 small text-uppercase">Pengukuran Paparan Radiasi (PPR)</h6>
+                                </div>
+                                <div class="col-md-4"><label class="form-label small fw-bold text-muted">Laju Dosis Permukaan Kontainer</label>
+                                    <div class="input-group"><input type="number" step="0.01" class="form-control border-secondary" required><span class="input-group-text bg-light border-secondary small">mSv/jam</span></div>
+                                </div>
+                                <div class="col-md-4"><label class="form-label small fw-bold text-muted">Laju Dosis Jarak 1 Meter</label>
+                                    <div class="input-group"><input type="number" step="0.01" class="form-control border-secondary" required><span class="input-group-text bg-light border-secondary small">mSv/jam</span></div>
+                                </div>
+                                <div class="col-md-4"><label class="form-label small fw-bold text-muted">Laju Dosis Area Kabin Kemudi</label>
+                                    <div class="input-group"><input type="number" step="0.01" class="form-control border-secondary" required><span class="input-group-text bg-light border-secondary small">mSv/jam</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer bg-white border-top p-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-secondary fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark fw-bold px-5 shadow-sm hover-elevate"><i class="bi bi-send-check me-2 text-warning"></i> DISPATCH NOW</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDetails(detailId, rowElement) {
+        const detailRow = document.getElementById(detailId);
+        rowElement.classList.toggle('expanded');
+        if (detailRow.classList.contains('show')) { detailRow.classList.remove('show'); } else { detailRow.classList.add('show'); }
+    }
+
+    function setDispatchData(hospital, route, target, leadpot, batchId) {
+        document.getElementById('modalCustomerName').value = hospital;
+        document.getElementById('modalRoute').value = route;
+        document.getElementById('modalTargetAct').value = target;
+        document.getElementById('modalLeadpot').value = leadpot;
+        document.getElementById('modalBatchId').value = batchId;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const trackingTab = document.querySelector('button[data-bs-target="#tab-tracking"]');
+        let mapInitialized = false;
+        
+        trackingTab.addEventListener('shown.bs.tab', () => {
+            if(!mapInitialized) {
+                var map = L.map('liveMap').setView([-6.2088, 106.8456], 8);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 }).addTo(map);
+
+                var facilityIcon = L.divIcon({ html: '<div style="background-color:#181C32; width:20px; height:20px; border-radius:50%; border:3px solid white; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>', iconSize: [20, 20] });
+                L.marker([-6.2088, 106.8456], {icon: facilityIcon}).addTo(map).bindPopup('<b>PT IMS Facility</b>').openPopup();
+
+                var carIcon = L.divIcon({ html: '<div style="background-color:#ffc107; font-size:18px; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid white; box-shadow:0 2px 5px rgba(0,0,0,0.3);">🚚</div>', iconSize: [30, 30] });
+                L.marker([-6.7320, 108.5523], {icon: carIcon}).addTo(map).bindPopup('<b>DO-2026-001</b><br>Rute 3 (Jawa Barat)');
+                mapInitialized = true;
+            }
+        });
+    });
+</script>
+
+<%- include('../partials/footer') %>

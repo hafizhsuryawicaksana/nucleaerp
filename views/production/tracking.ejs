@@ -1,0 +1,147 @@
+<%- include('../partials/header', { title: 'Batch Tracking | Nuclea ERP - PT IMS' }) %>
+<%- include('../partials/sidebar', { page: 'tracking' }) %>
+
+<style>
+    /* CSS Animasi Sensor Live */
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+    }
+    .sensor-live {
+        width: 10px; height: 10px;
+        background-color: #dc3545;
+        border-radius: 50%;
+        display: inline-block;
+        animation: pulse-red 2s infinite;
+    }
+</style>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+
+    <main class="app-main">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Live Batch Tracking</h4>
+                <span class="text-muted small">Real-time pipeline monitoring of ongoing 18F-FDG production and synthesis</span>
+            </div>
+            <a href="/production" class="btn btn-dark fw-bold shadow-sm hover-elevate px-4">
+                <i class="bi bi-rocket-takeoff me-2 text-warning"></i> Launch New Batch
+            </a>
+        </div>
+
+        <div class="row g-4">
+            <% if (activeBatches && activeBatches.length > 0) { %>
+                <% activeBatches.forEach(batch => { %>
+                <div class="col-12">
+                    <div class="card shadow-sm border-0 border-start border-warning border-4 hover-elevate">
+                        <div class="card-header bg-light border-bottom py-3 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <span class="spinner-grow spinner-grow-sm text-warning me-3" role="status" aria-hidden="true"></span>
+                                <h5 class="fw-bolder text-dark mb-0"><%= batch.batch_id %></h5>
+                                <span class="badge bg-warning text-dark border border-warning ms-3 px-3 py-1">IN PROGRESS</span>
+                            </div>
+                            <div class="text-end">
+                                <span class="d-block small text-muted fw-bold">Active Operator</span>
+                                <span class="text-dark small fw-bold"><i class="bi bi-person-badge me-1 text-primary"></i> <%= user.full_name %></span>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            
+                            <!-- PIPELINE PROGRESS VISUAL -->
+                            <div class="py-4 mb-4 mt-2">
+                                <div class="position-relative">
+                                    <div class="progress position-absolute" style="height: 6px; top: 22px; left: 12.5%; width: 75%; z-index: 1; background-color: var(--kt-sidebar-border);">
+                                        <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" role="progressbar" style="width: 35%;" aria-valuenow="35" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    
+                                    <div class="d-flex justify-content-between position-relative" style="z-index: 2;">
+                                        <!-- Step 1: Done -->
+                                        <div class="text-center" style="width: 25%;">
+                                            <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center mx-auto border border-4 border-white shadow" style="width: 50px; height: 50px;">
+                                                <i class="bi bi-check-lg fs-4"></i>
+                                            </div>
+                                            <div class="mt-3 fw-bold text-dark text-nowrap">Bombardment</div>
+                                            <div class="text-muted small">Cyclotron Run</div>
+                                        </div>
+                                        <!-- Step 2: Active -->
+                                        <div class="text-center" style="width: 25%;">
+                                            <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center mx-auto border border-4 border-white shadow" style="width: 50px; height: 50px;">
+                                                <span class="spinner-border spinner-border-sm border-2"></span>
+                                            </div>
+                                            <div class="mt-3 fw-bold text-warning text-nowrap">Synthesis Module</div>
+                                            <div class="text-muted small">Hot Cell Extraction</div>
+                                        </div>
+                                        <!-- Step 3: Pending -->
+                                        <div class="text-center" style="width: 25%;">
+                                            <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center mx-auto border border-4 border-white shadow-sm" style="width: 50px; height: 50px;">
+                                                <i class="bi bi-funnel fs-5"></i>
+                                            </div>
+                                            <div class="mt-3 fw-bold text-muted text-nowrap">Quality Control</div>
+                                            <div class="text-muted small">Testing Phase</div>
+                                        </div>
+                                        <!-- Step 4: Pending -->
+                                        <div class="text-center" style="width: 25%;">
+                                            <div class="bg-light text-muted rounded-circle d-flex align-items-center justify-content-center mx-auto border border-4 border-white shadow-sm" style="width: 50px; height: 50px;">
+                                                <i class="bi bi-box-seam fs-5"></i>
+                                            </div>
+                                            <div class="mt-3 fw-bold text-muted text-nowrap">Dispensing</div>
+                                            <div class="text-muted small">Packaging</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- LIVE SENSOR DATA CARDS -->
+                            <div class="row g-3 text-center">
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded shadow-sm bg-white position-relative overflow-hidden">
+                                        <div class="position-absolute top-0 end-0 p-2"><span class="sensor-live"></span></div>
+                                        <span class="d-block text-muted small text-uppercase fw-bold mb-1">Target Current</span>
+                                        <h2 class="fw-bolder text-primary mb-0"><%= batch.beam_current_ua %> <span class="fs-6 fw-normal text-muted">µA</span></h2>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded shadow-sm bg-white position-relative overflow-hidden">
+                                        <div class="position-absolute top-0 end-0 p-2"><span class="sensor-live"></span></div>
+                                        <span class="d-block text-muted small text-uppercase fw-bold mb-1">Bombardment Time</span>
+                                        <h2 class="fw-bolder text-dark mb-0"><%= batch.beam_duration_min %> <span class="fs-6 fw-normal text-muted">Min</span></h2>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-3 border rounded shadow-sm bg-white position-relative overflow-hidden">
+                                        <div class="position-absolute top-0 end-0 p-2"><span class="sensor-live"></span></div>
+                                        <span class="d-block text-muted small text-uppercase fw-bold mb-1">Cleanroom Temp</span>
+                                        <h2 class="fw-bolder text-dark mb-0"><%= batch.env_temp %> <span class="fs-6 fw-normal text-muted">°C</span></h2>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="p-3 border border-warning rounded shadow-sm bg-warning bg-opacity-10">
+                                        <span class="d-block text-warning small text-uppercase fw-bold mb-1">Est. Completion</span>
+                                        <h2 class="fw-bolder text-dark mb-0"><i class="bi bi-clock-history me-1"></i> 45 <span class="fs-6 fw-normal text-muted">Mins</span></h2>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <% }) %>
+            <% } else { %>
+                <div class="col-12">
+                    <div class="card shadow-sm border border-dashed bg-transparent hover-elevate">
+                        <div class="card-body p-5 text-center text-muted">
+                            <i class="bi bi-display fs-1 d-block mb-3 opacity-50"></i>
+                            <h5 class="fw-bold">No Active Batches</h5>
+                            <p class="small">The Cyclotron and Hot Cells are currently on standby mode.</p>
+                            <a href="/production" class="btn btn-dark fw-bold mt-2 shadow-sm"><i class="bi bi-rocket-takeoff me-1 text-warning"></i> Launch New Batch</a>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </main>
+</div>
+
+<%- include('../partials/footer') %>

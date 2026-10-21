@@ -1,0 +1,54 @@
+<%- include('../partials/header', { title: 'Production History | Nuclea ERP' }) %>
+<%- include('../partials/sidebar', { page: 'history' }) %>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+
+    <main class="app-main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Batch Audit History</h4>
+                <span class="text-muted small">CFR Part 11 compliant logs for completed batches.</span>
+            </div>
+            <button class="btn btn-outline-success fw-bold shadow-sm hover-elevate bg-white"><i class="bi bi-file-earmark-excel me-1"></i> Export BAPETEN Report</button>
+        </div>
+
+        <div class="card shadow-sm border-0 border-start border-dark border-4 hover-elevate">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-enterprise mb-0" id="histTable">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Batch ID & Date</th>
+                                <th>Actual EOB</th>
+                                <th>Final Yield</th>
+                                <th>QC Status</th>
+                                <th class="pe-4 text-end">Documents</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-4">
+                                    <span class="d-block fw-bold text-primary fs-6">FDG-260900</span>
+                                    <span class="small text-muted">25 Sep 2026</span>
+                                </td>
+                                <td><span class="fw-bold text-dark"><i class="bi bi-clock text-muted me-1"></i> 04:35 WIB</span></td>
+                                <td><span class="badge bg-light text-dark border px-3 py-2 fs-6">1,650 mCi</span></td>
+                                <td>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1 mb-1 d-inline-block"><i class="bi bi-shield-check"></i> PASS</span><br>
+                                    <span class="small text-muted" style="font-size: 0.7rem;">pH: 6.5 | Pur: 99.2%</span>
+                                </td>
+                                <td class="pe-4 text-end">
+                                    <button class="btn btn-sm btn-light border text-danger hover-elevate"><i class="bi bi-file-earmark-pdf"></i> CoA</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>document.addEventListener('DOMContentLoaded', () => { const t = document.getElementById('histTable'); if(t) new simpleDatatables.DataTable(t); });</script>
+<%- include('../partials/footer') %>

@@ -1,0 +1,148 @@
+<!-- CORE JS LIBRARIES -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        /* Standardize create/register forms into accessible Bootstrap dialogs. Form nodes are moved (not cloned), preserving file inputs and listeners. */
+        const makeFormModal = (element, index, options = {}) => {
+            if (!element || element.dataset.modalized === 'true') return;
+            if (!element.matches('details') && !element.querySelector('form')) return;
+            const summary = element.matches('details') ? element.querySelector(':scope > summary') : null;
+            const title = element.getAttribute('data-modalize-title') || (summary ? summary.textContent.trim() : 'Form');
+            const buttonText = element.getAttribute('data-modalize-button') || (summary ? summary.textContent.trim() : ('Add / ' + title));
+            const size = element.getAttribute('data-modalize-size') || 'lg';
+            const body = element.matches('details') ? element : (element.querySelector(':scope > .card-body') || element);
+            const footer = element.matches('details') ? null : element.querySelector(':scope > .card-footer');
+            const modalId = 'nuclea-form-modal-' + index + '-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const modal = document.createElement('div');
+            modal.className = 'modal fade'; modal.id = modalId; modal.tabIndex = -1;
+            modal.setAttribute('aria-labelledby', modalId + '-label'); modal.setAttribute('aria-hidden', 'true');
+            modal.innerHTML = '<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-' + size + '"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold" id="' + modalId + '-label"></h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body modalized-card-body"></div></div></div>';
+            modal.querySelector('.modal-title').textContent = title;
+            const modalBody = modal.querySelector('.modal-body');
+            if (summary) {
+                Array.from(element.childNodes).forEach(node => { if (node !== summary) modalBody.appendChild(node); });
+            } else {
+                while (body.firstChild) modalBody.appendChild(body.firstChild);
+                if (footer) { while (footer.firstChild) modalBody.appendChild(footer.firstChild); }
+            }
+            const slot = document.createElement('span'); slot.className = 'modalized-trigger-slot';
+            const button = document.createElement('button'); button.type = 'button';
+            button.className = element.matches('details') ? 'btn btn-sm btn-outline-primary mb-1' : 'btn btn-primary';
+            button.setAttribute('data-bs-toggle','modal'); button.setAttribute('data-bs-target','#' + modalId);
+            if (!element.matches('details')) button.innerHTML = '<i class="bi bi-plus-circle me-2" aria-hidden="true"></i>';
+            button.appendChild(document.createTextNode(buttonText)); slot.appendChild(button);
+            element.replaceWith(slot); document.body.appendChild(modal);
+            element.dataset.modalized = 'true';
+        };
+        document.querySelectorAll('[data-modalize-title]').forEach((element, index) => makeFormModal(element, index));
+        /* Promote explicitly marked inline forms (for example QA release and CoA upload in a table row) into dialogs while preserving the original form node. */
+        document.querySelectorAll('form[data-popup-form-title]').forEach((form, index) => {
+            const title = form.getAttribute('data-popup-form-title') || 'Form';
+            const buttonText = form.getAttribute('data-popup-form-button') || title;
+            const size = form.getAttribute('data-popup-form-size') || 'lg';
+            const modalId = 'nuclea-inline-form-modal-' + index + '-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const modal = document.createElement('div'); modal.className = 'modal fade'; modal.id = modalId; modal.tabIndex = -1;
+            modal.setAttribute('aria-labelledby', modalId + '-label'); modal.setAttribute('aria-hidden', 'true');
+            modal.innerHTML = '<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-' + size + '"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold" id="' + modalId + '-label"></h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"></div></div></div>';
+            modal.querySelector('.modal-title').textContent = title;
+            const trigger = document.createElement('button'); trigger.type = 'button'; trigger.className = 'btn btn-sm btn-outline-primary mb-1';
+            trigger.setAttribute('data-bs-toggle','modal'); trigger.setAttribute('data-bs-target','#' + modalId); trigger.appendChild(document.createTextNode(buttonText));
+            const slot = document.createElement('span'); slot.className = 'modalized-trigger-slot'; slot.appendChild(trigger);
+            if (form.parentNode) form.parentNode.replaceChild(slot, form);
+            modal.querySelector('.modal-body').appendChild(form); form.classList.add('mb-0');
+            document.body.appendChild(modal);
+        });
+        /* Convert inline action disclosures containing forms into consistent accessible dialogs across legacy and roadmap modules. */
+        let actionModalIndex = 1000;
+        document.querySelectorAll('details').forEach(details => {
+            if (details.closest('.modal') || details.dataset.noModalize === 'true' || !details.querySelector('form')) return;
+            makeFormModal(details, actionModalIndex++);
+        });
+        /* Replace expanded Bootstrap collapse panels that contain partner/forms with dialog triggers. This keeps large customer/vendor QA matrices out of the master table. */
+        let collapseModalIndex = 3000;
+        document.querySelectorAll('.collapse[id]').forEach(panel => {
+            if (panel.closest('.modal') || !panel.querySelector('form')) return;
+            const panelTarget = '#' + panel.id;
+            const triggers = Array.from(document.querySelectorAll('[data-bs-toggle="collapse"]')).filter(trigger => trigger.getAttribute('data-bs-target') === panelTarget);
+            if (!triggers.length) return;
+            const modalId = 'nuclea-collapse-modal-' + collapseModalIndex++;
+            const title = (triggers[0].textContent || 'Details / Manage').trim();
+            const modal = document.createElement('div'); modal.className = 'modal fade'; modal.id = modalId; modal.tabIndex = -1;
+            modal.setAttribute('aria-labelledby', modalId + '-label'); modal.setAttribute('aria-hidden', 'true');
+            modal.innerHTML = '<div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title fw-bold" id="' + modalId + '-label"></h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div><div class="modal-body"></div></div></div>';
+            modal.querySelector('.modal-title').textContent = title;
+            const modalBody = modal.querySelector('.modal-body');
+            while (panel.firstChild) modalBody.appendChild(panel.firstChild);
+            triggers.forEach(trigger => { trigger.setAttribute('data-bs-toggle','modal'); trigger.setAttribute('data-bs-target','#' + modalId); });
+            const row = panel.closest('tr.collapse-row'); if (row) row.remove();
+            document.body.appendChild(modal);
+        });
+
+        /* 1. SKELETON LOADER REMOVAL */
+        setTimeout(() => {
+            const skeletons = document.querySelectorAll('.skeleton-overlay');
+            skeletons.forEach(el => {
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 500);
+            });
+        }, 800);
+
+        /* 2. SWEETALERT TOASTS */
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('success')) {
+            Swal.fire({
+                toast: true, position: 'top-end', icon: 'success', title: urlParams.get('success'),
+                showConfirmButton: false, timer: 3000, timerProgressBar: true,
+                background: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? '#1e1e2d' : '#fff',
+                color: document.documentElement.getAttribute('data-bs-theme') === 'dark' ? '#fff' : '#000'
+            });
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        /* 3. MOBILE SIDEBAR LOGIC */
+        const mobileBtn = document.getElementById('mobileMenuBtn');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (mobileBtn) mobileBtn.addEventListener('click', () => document.body.classList.toggle('sidebar-open'));
+        if (overlay) overlay.addEventListener('click', () => document.body.classList.remove('sidebar-open'));
+
+        /* 4. ENTERPRISE DARK MODE TOGGLE */
+        const themeCheckbox = document.getElementById('themeToggleCheckbox');
+        const htmlEl = document.documentElement;
+        
+        if (themeCheckbox) {
+            themeCheckbox.addEventListener('change', () => {
+                const newTheme = themeCheckbox.checked ? 'dark' : 'light';
+                htmlEl.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                // Dispatch event so Chart.js can detect theme changes
+                window.dispatchEvent(new Event('themeChanged')); 
+            });
+        }
+    });
+</script>
+<script>
+(() => {
+  let lastVisibleMark = document.visibilityState === 'visible' ? Date.now() : null;
+  const sendHeartbeat = (finalSend = false) => {
+    if (lastVisibleMark === null) return;
+    const now = Date.now();
+    const seconds = Math.max(0, Math.min(90, Math.floor((now - lastVisibleMark) / 1000)));
+    if (!seconds) return;
+    lastVisibleMark = finalSend ? null : now;
+    fetch('/api/user-activity/heartbeat', {
+      method: 'POST', credentials: 'same-origin', keepalive: finalSend,
+      headers: {'Content-Type':'application/json'}, body: JSON.stringify({active_seconds: seconds})
+    }).catch(() => {});
+  };
+  window.setInterval(() => { if (document.visibilityState === 'visible') sendHeartbeat(false); }, 30000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') sendHeartbeat(true);
+    else lastVisibleMark = Date.now();
+  });
+  window.addEventListener('pagehide', () => sendHeartbeat(true));
+})();
+</script>
+</body>
+</html>

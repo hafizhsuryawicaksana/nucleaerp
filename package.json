@@ -1,0 +1,31 @@
+{
+  "name": "nuclea-erp",
+  "version": "2.1.0",
+  "description": "NUCLEA integrated ERP for radiopharmaceutical manufacturing, quality and distribution workflows",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "check": "node --check index.js && node --check modules/erp-integrated.js && node --check modules/roadmap-erp.js && node scripts/check-ejs.js",
+    "test": "npm run check"
+  },
+  "keywords": [
+    "erp",
+    "radiopharmaceutical",
+    "manufacturing",
+    "quality",
+    "supply-chain"
+  ],
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "ejs": "^5.0.1",
+    "express": "^5.2.1",
+    "express-session": "^1.19.0",
+    "multer": "^2.1.1",
+    "nodemailer": "^8.0.1",
+    "pdfkit": "^0.17.2",
+    "pg": "^8.20.0"
+  }
+}

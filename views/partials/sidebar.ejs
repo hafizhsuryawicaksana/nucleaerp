@@ -1,0 +1,44 @@
+<%
+  const navUser = (typeof user !== 'undefined' && user) ? user : {};
+  const navIsCustom = !!navUser._erpCustomRole;
+  const navPermissions = navUser._erpRolePermissions || {};
+  const navCan = code => !navIsCustom || !!(navPermissions[code] && navPermissions[code].can_view === true);
+  const navAny = codes => codes.some(navCan);
+%>
+<aside class="app-sidebar border-end shadow-sm" id="appSidebar">
+  <div class="sidebar-brand p-3 border-bottom">
+    <a href="/" class="text-decoration-none d-flex align-items-center justify-content-center w-100" aria-label="NUCLEA ERP home">
+      <img src="/logo.png" alt="NUCLEA ERP" class="img-fluid app-logo" style="max-height:60px;width:90%;max-width:300px;object-fit:contain;">
+    </a>
+  </div>
+  <div class="sidebar-content">
+    <ul class="nav flex-column gap-1">
+      <li class="nav-item"><a href="/" class="menu-link-color <%= typeof page !== 'undefined' && page === 'dashboard' ? 'active' : '' %>"><i class="bi bi-grid-1x2"></i><span>Dashboard</span></a></li>
+      <% if(navAny(['MANUFACTURING_PLANNING','MANUFACTURING_EXECUTION','MANUFACTURING_BATCH_RECORD','MANUFACTURING_HISTORY'])) { %>
+      <li class="nav-item menu-section">MANUFACTURING</li>
+      <% if(navCan('MANUFACTURING_PLANNING')) { %><li class="nav-item"><a href="/manufacturing/planning" class="menu-link-color <%= page === 'roadmap-planning' ? 'active' : '' %>"><i class="bi bi-calendar2-week"></i><span>Production Planning</span></a></li><% } %>
+      <% if(navCan('MANUFACTURING_EXECUTION')) { %><li class="nav-item"><a href="/manufacturing/execution" class="menu-link-color <%= page === 'roadmap-execution' || page === 'erp-labels' ? 'active' : '' %>"><i class="bi bi-play-circle"></i><span>Production Execution</span></a></li><% } %>
+      <% if(navCan('MANUFACTURING_BATCH_RECORD')) { %><li class="nav-item"><a href="/manufacturing/batch-records" class="menu-link-color <%= page === 'roadmap-batch-records' ? 'active' : '' %>"><i class="bi bi-journal-check"></i><span>Batch Record (BMR/BPR)</span></a></li><% } %>
+      <% if(navCan('MANUFACTURING_HISTORY')) { %><li class="nav-item"><a href="/manufacturing/history" class="menu-link-color <%= page === 'roadmap-history' ? 'active' : '' %>"><i class="bi bi-clock-history"></i><span>Production History</span></a></li><% } %>
+      <% } %>
+      <% if(navAny(['INVENTORY','MATERIAL_REQUISITION','VENDOR','ASSET'])) { %>
+      <li class="nav-item menu-section">SUPPLY CHAIN</li>
+      <% if(navCan('INVENTORY')) { %><li class="nav-item"><a href="/inventory" class="menu-link-color <%= page === 'roadmap-inventory' || page === 'erp-inventory-adjustment' ? 'active' : '' %>"><i class="bi bi-boxes"></i><span>Inventory</span></a></li><% } %>
+      <% if(navCan('MATERIAL_REQUISITION')) { %><li class="nav-item"><a href="/material-requisition" class="menu-link-color <%= page === 'roadmap-material-requisition' ? 'active' : '' %>"><i class="bi bi-clipboard2-check"></i><span>Material Requisition</span></a></li><% } %>
+      <% if(navCan('VENDOR')) { %><li class="nav-item"><a href="/vendors" class="menu-link-color <%= page === 'roadmap-vendors' ? 'active' : '' %>"><i class="bi bi-building-gear"></i><span>Vendor Management</span></a></li><% } %>
+      <% if(navCan('ASSET')) { %><li class="nav-item"><a href="/assets" class="menu-link-color <%= page === 'roadmap-assets' ? 'active' : '' %>"><i class="bi bi-box-seam"></i><span>Asset Management</span></a></li><% } %>
+      <% } %>
+      <% if(navAny(['CUSTOMER','DISTRIBUTION','LIVE_TRACKING'])) { %>
+      <li class="nav-item menu-section">CUSTOMER & DISTRIBUTION</li>
+      <% if(navCan('CUSTOMER')) { %><li class="nav-item"><a href="/customers" class="menu-link-color <%= page === 'roadmap-customers' ? 'active' : '' %>"><i class="bi bi-hospital"></i><span>Customer Management</span></a></li><% } %>
+      <% if(navCan('DISTRIBUTION')) { %><li class="nav-item"><a href="/erp/distribution" class="menu-link-color <%= page === 'erp-distribution' ? 'active' : '' %>"><i class="bi bi-truck"></i><span>Distribution</span></a></li><% } %>
+      <% if(navCan('LIVE_TRACKING')) { %><li class="nav-item"><a href="/driver/mobile" class="menu-link-color <%= page === 'driver-mobile' ? 'active' : '' %>"><i class="bi bi-broadcast-pin"></i><span>Live Tracking App</span></a></li><% } %>
+      <% } %>
+      <% if(navCan('SECURITY_CONTROL')) { %>
+      <li class="nav-item menu-section">GOVERNANCE & SYSTEM</li>
+      <% if(navCan('SECURITY_CONTROL')) { %><li class="nav-item"><a href="/security-control" class="menu-link-color <%= page === 'security-control' || page === 'roadmap-users' || page === 'erp-audit' || page === 'erp-access-control' ? 'active' : '' %>"><i class="bi bi-shield-lock"></i><span>Security Control</span></a></li><% } %>
+      <% } %>
+    </ul>
+    <div class="sidebar-footer mt-auto pt-3"><a href="/auth/logout" class="menu-link-color text-danger"><i class="bi bi-box-arrow-left"></i><span>Sign out</span></a></div>
+  </div>
+</aside>

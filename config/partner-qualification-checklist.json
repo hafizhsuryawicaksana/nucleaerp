@@ -1,0 +1,544 @@
+{
+  "source_note": "Checklist text extracted from user-provided forms. QA must confirm applicability and current revision before controlled use.",
+  "qualification_checklist": [
+    {
+      "number": "1. 1",
+      "item": "Apakah ada suatu sistem mutu yang diterapkan terhadap struktur organisasi, tanggung jawab, proses dan sumber daya untuk pelaksanaan manajemen mutu? Is there a quality system applied to the organizational structure, responsibilities, processes and resources for implementing the quality management?"
+    },
+    {
+      "number": "1. 2",
+      "item": "Apakah efektivitas sistem pemastian mutu diperiksa secara berkala? Is the effectiveness of quality assurance system checked periodically?"
+    },
+    {
+      "number": "1.3",
+      "item": "Apakah sudah pernah dilakukan kualifikasi dan/atau audit vendor oleh customer lain? Jika ya, kapan terakhir dilakukan? Has the company ever been qualified and/or audited by other customers? If yes, when was it last conducted?"
+    },
+    {
+      "number": "2. 1",
+      "item": "Apakah rancangan dan spesifikasi pelanggan ditinjau oleh bagian pengawasan mutu atau bagian lain yang berwenang untuk memastikan persyaratan pelanggan dapat dipenuhi? Are customer designs and specifications reviewed by quality control department or other authorized department to ensure that customer requirements are met?"
+    },
+    {
+      "number": "2. 2",
+      "item": "Apakah pengawasan terhadap rancangan, spesifikasi, gambar, teknik, metoda pemeriksaan dan dokumen lain milik pelanggan cukup memadai? Is control of customer designs, specifications, technical drawings, analytical methods and other documents adequate?"
+    },
+    {
+      "number": "2. 3",
+      "item": "Apakah dokumen pelanggan diterjemahkan ke dalam dokumen internal? Are customer documents translated into internal documents?"
+    },
+    {
+      "number": "2.6",
+      "item": "Apakah bahan disimpan dan dikirimkan dalam wadah pengiriman yang tidak mengakibatkan efek merugikan terhadap mutu produk, dan memberikan perlindungan yang memadai terhadap pengaruh eksternal, termasuk kontaminasi? Are materials stored and shipped in shipping containers that do not adversely affect product quality, and provide adequate protection against external influences, including contamination?"
+    },
+    {
+      "number": "3. 1",
+      "item": "Apakah penyimpanan dilaksanakan secara prinsip FIFO (First In First Out) dan FEFO (First Expired First Out)? Is storage carried out according to FIFO (First In First Out) and FEFO (First Expired First Out) principles?"
+    },
+    {
+      "number": "3. 2",
+      "item": "Apakah produk-produk ditangani, disimpan dan ditandai sedemikian rupa hingga batch-batch dan status bahan/produk yang berbeda tidak akan tercampur baur dan terhindar dari kerusakan? Are products handled, stored, and identified to ensure segregation of different batches and material/product statuses, and to prevent mix-ups and damage?"
+    },
+    {
+      "number": "3. 3",
+      "item": "Apakah terdapat prosedur penanganan bahan dan produk jadi, seperti penerimaan karantina, penyimpanan, penandaan, penimbangan, dan distribusi? Are there written procedures for handling materials and finished products, such as receiving, quarantine, storage, labeling, weighing, and distribution?"
+    },
+    {
+      "number": "3. 4",
+      "item": "Apakah produk-produk diuji sebelum penyerahan dilaksanakan agar dapat dideteksi bila terjadi kerusakan pada waktu transport atau selama di gudang dan apakah pengemasannya memuaskan? Are products tested before delivery to detect any damage during transport or in the warehouse and is the packaging satisfactory?"
+    },
+    {
+      "number": "3. 5",
+      "item": "Apakah bahan diidentifikasi secukupnya untuk membedakan bahan yang diluluskan dari bahan yang ditolak? Are materials identified sufficiently to distinguish released materials from rejected materials?"
+    },
+    {
+      "number": "3. 6",
+      "item": "Apakah kondisi penyimpanan terhadap bahan-bahan tertentu diperhatikan? misal suhu ruang, kelembaban, perbedaan tekanan, dll. Are storage conditions for certain materials observed? Such as room temperature, humidity, etc."
+    },
+    {
+      "number": "3. 7",
+      "item": "Apakah persediaan diinspeksi dan diuji ulang dalam tenggang waktu tertentu? Is inventory inspected and retested at regular intervals?"
+    },
+    {
+      "number": "3. 8",
+      "item": "Apakah tersedia fasilitas yang baik untuk menyimpan bahan sebelum dilakukan pengujian? Are good facilities available to store materials before test?"
+    },
+    {
+      "number": "3.9",
+      "item": "Apakah tersedia catatan pemantauan suhu dan kelembaban selama transportasi? (jika diperlukan) Are temperature and humidity monitoring records available during transport? (if required)"
+    },
+    {
+      "number": "3.10",
+      "item": "Apakah tersedia prosedur dan catatan tertulis untuk memastikan ketertelusuran distribusi produk? Termasuk pendistribusian hanya kepada distributor dan/atau sarana yang berwenang? Are written procedures and records in place to ensure traceability of product distribution, including distribution only to authorized distributors and/or facilities?"
+    },
+    {
+      "number": "3.11",
+      "item": "Apakah ada sistem yang memadai untuk recall batch produk? Is there an adequate system to recall batch product?"
+    },
+    {
+      "number": "4. 1",
+      "item": "Apakah ada perencanaan produksi dan didokumentasikan? Is there a production plan and is it documented?"
+    },
+    {
+      "number": "4. 2",
+      "item": "Apakah penyediaan bahan untuk produksi diawasi secara ketat? Are material supplies for production monitored strictly?"
+    },
+    {
+      "number": "4. 3",
+      "item": "Apakah produk yang sedang dibuat diberi identitas jelas sepanjang proses pembuatan? Is the product being manufactured clearly identified throughout the manufacturing process?"
+    },
+    {
+      "number": "4. 4",
+      "item": "Apakah proses produksi dan sarananya memadai? Are the manufacturing processes and facilities adequate?"
+    },
+    {
+      "number": "4. 5",
+      "item": "Apakah bagian pengawasan mutu atau bagian lain yang berwenang memberi persetujuan atas dimulainya suatu proses produksi? Do quality control department or other authorized departments give approval on starting a manufacturing processes?"
+    },
+    {
+      "number": "4. 6",
+      "item": "Apakah pelaksanaan prosedur produksi diawasi dan dicatat setiap tahap prosesnya serta jumlah pemakaian bahan? Are implementation of manufacturing procedures monitored and recorded each step of the process as well as the amount of materials used?"
+    },
+    {
+      "number": "4. 7",
+      "item": "Apakah seluruh dokumentasi produksi disimpan dengan baik untuk jangka waktu tertentu? Are all production documentations stored properly for certain period of time?"
+    },
+    {
+      "number": "4.8",
+      "item": "Apakah semua mesin, instrumen dan peralatan memiliki status kualifikasi dan/atau kalibrasi yang masih valid? Do all machines, instruments and equipments have current and valid qualification and/or calibration status?"
+    },
+    {
+      "number": "4.9",
+      "item": "Apakah tersedia prosedur pembersihan alat? Dan apakah terealisasi sesuai dengan prosedur yang ada? Are there equipment cleaning procedures in place? And are they implemented inaccordance with these procedures?"
+    },
+    {
+      "number": "5. 1",
+      "item": "Apakah laboratorium pengawasan mutu memiliki fasilitas, peralatan serta staff yang memadai? Does the quality control laboratory have adequate facilities, equipments and staff?"
+    },
+    {
+      "number": "5. 2",
+      "item": "Apakah tersedia spesifikasi, pola pengambilan contoh dan klasifikasi cacat dari bahan yang digunakan? Are there specifications, sampling method pattern and defect classifications of materials used?"
+    },
+    {
+      "number": "5. 3",
+      "item": "Apakah contoh penerimaan bahan, produk dalam proses dan produk jadi mendapat pengawasan memadai? Are samples of receipt of materials, work in processes and finished products adequately supervised?"
+    },
+    {
+      "number": "5. 4",
+      "item": "Apakah fungsi bagian pengawasan mutu bebas untuk mengambil keputusan mengenai evaluasi mutu tanpa mengawatirkan adanya reaksi politis atas keputusan tersebut? Is the function of quality control department free to make decisions regarding quality evaluation without worriying about political reactions to these decisions?"
+    },
+    {
+      "number": "5.5",
+      "item": "Apakah terdapat ketentuan uji ulang terhadap bahan dalam tenggang waktu tertentu? Are there any provisions for retesting the material within a certain time frame?"
+    },
+    {
+      "number": "5. 6",
+      "item": "Apakah hasil inspeksi atau audit internal yang terakhir trdokumentasi dengan baik? Are the results of the most recent internal inspection and/or audit adequately documented?"
+    },
+    {
+      "number": "5.7",
+      "item": "Apakah terdapat sistem untuk memantau Corrective and Preventive Action (CAPA) dari kejadian penyimpangan, hasil investigasi maupun audit internal? Is there a system to monitor Corrective and Preventive Action (CAPA) from deviation, investigation result and internal audit?"
+    },
+    {
+      "number": "5.8",
+      "item": "Apakah terdapat prosedur tindakan penanganan keluhan dan informasi lain tentang kemungkinan kerusakan dan kemungkinan pemalsuan Obat? Are there procedures for handling complaints and other information about possible damage and possible counter feiting of drugs?"
+    },
+    {
+      "number": "6.1",
+      "item": "Apakah ada catatan yang lengkap dari semua kegiatan dan hasil-hasil pengujian? Are there complete records of all activities and test results?"
+    },
+    {
+      "number": "6.2",
+      "item": "Apakah semua dokumentasi produk disimpan paling sedikit selama 2 tahun? Is all product documentation stored for at least 2 years?"
+    },
+    {
+      "number": "6.3",
+      "item": "Apakah semua langkah-langkah yang digariskan pada suatu revisi segera dilatihkan, dijalankan, didokumentasi dan dipantau? Are all the steps outlined in a revision immediately practiced, implemented, recorded and monitored?"
+    },
+    {
+      "number": "6.4",
+      "item": "Apakah penyimpangan yang ditemukan diteliti dengan cermat, ditindak lanjuti dan didokumentasikan? Are any deviations discovered carefully investigated, followed up and documented?"
+    },
+    {
+      "number": "6.5",
+      "item": "Apakah memiliki standar kualifikasi personel sesuai dengan kebutuhan perusahaan? Does the company have established personnel qualification standards aligned with its operational requirements?"
+    },
+    {
+      "number": "6.6",
+      "item": "Apakah tersedia prosedur sanitasi dan hygiene yang mencakup ketentuan larangan, praktik kesehatan, dan pakaian personel? Are sanitation and hygiene procedures established, including provisions on prohibitions, health practices, and personnel gowning?"
+    }
+  ],
+  "document_requirements": [
+    {
+      "cells": [
+        "No. No.",
+        "Persyaratan Dokumen Document Requirements",
+        "Pihak Ketiga Third Party",
+        "Pihak Ketiga Third Party",
+        "Pihak Ketiga Third Party",
+        "Pihak Ketiga Third Party",
+        "Pihak Ketiga Third Party"
+      ]
+    },
+    {
+      "cells": [
+        "No. No.",
+        "Persyaratan Dokumen Document Requirements",
+        "Bahan Baku Raw Material",
+        "Bahan Kemas Packaging Material",
+        "Material Pendukung Supporting Material",
+        "Penyedia Jasa Service",
+        "Keterangan Information"
+      ]
+    },
+    {
+      "cells": [
+        "1.",
+        "Profil Perusahaan Company profile",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "2.",
+        "Akta Pendirian Perusahaan Deed of Incorporation",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "3.",
+        "Akta Perubahan Perusahaan (terbaru) Company Amendment Deed (the latest)",
+        "Jika ada If there are",
+        "Jika ada If there are",
+        "Jika ada If there are",
+        "Jika ada If there are",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "4.",
+        "Nomor Induk Berusaha (NIB)/Surat Izin Usaha Perdagangan (SIUP) Business Identification Number/Trade Business License",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "5.",
+        "Kartu Tanda Penduduk (KTP) Pemilik Usaha Business Owner's Identity Card",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "6.",
+        "Nomor Pokok Wajib Pajak (NPWP) Pemilik Usaha Taxpayer Identification Number of Business Owners",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "7.",
+        "Nomor Pokok Wajib Pajak (NPWP) Perusahaan Company Taxpayer Identification Number",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "8.",
+        "Surat Pengukuhan Pengusaha Kena Pajak (SPPKP) Taxable Entrepreneur Confirmation Letter",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "9.",
+        "Sertifikat CPOB/GMP/ISO/KAN CPOB/GMP/ISO/KAN Certificate",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "10.",
+        "Sertifikat Analisis (CoA) Certificate of Analysis (CoA)",
+        "✓",
+        "✓",
+        "✓",
+        "✓ (bila perlu) If needed",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "11.",
+        "Spesifikasi Material Produk Product Specification",
+        "✓",
+        "✓",
+        "✓",
+        "✓ (bila perlu) If needed",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "12.",
+        "Lembar Data Keselamatan Material Safety Data Sheet (MSDS)/ Technical Data Sheet (TDS)",
+        "✓",
+        "✓",
+        "✓",
+        "-",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "13.",
+        "Diagram Flow Proses Jasa/Produksi Produk Service/Manufacturing Process Flow Diagram",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "14.",
+        "Rute Sintesis Synthetic Route",
+        "✓",
+        "-",
+        "-",
+        "-",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "15.",
+        "Tren Data Kepuasan dan Keluhan Pelanggan Customer Complaint and Satisfaction Data Trends",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "16.",
+        "Laporan Pemastian Mutu Produk (PMP) Product Quality Review Report (PQR)",
+        "✓",
+        "-",
+        "-",
+        "-",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "17.",
+        "Data Stabilita Produk Product Stability Data",
+        "✓",
+        "-",
+        "-",
+        "-",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "18.",
+        "Tren Data Penarikan Produk Product Recall Data Trends",
+        "✓",
+        "✓",
+        "-",
+        "-",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "19.",
+        "Critical Control Point (CCP) Critical Control Point (CCP)",
+        "✓",
+        "-",
+        "-",
+        "-",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "20.",
+        "Data Stabilita Produk Product Stability Data",
+        "✓",
+        "-",
+        "-",
+        "-",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "21.",
+        "Laporan Audit Internal Tahunan Annual Audit Internal Report",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "22.",
+        "Riwayat Audit Regulatori (terbaru) Audit Regulatory History (the latest)",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    },
+    {
+      "cells": [
+        "23.",
+        "Daftar Kerja Sama Pelanggan Customer Lists",
+        "✓",
+        "✓",
+        "✓",
+        "✓",
+        "N/A"
+      ]
+    }
+  ],
+  "fleet_checklist": [
+    {
+      "number": "1",
+      "item": "Fungsi rem depan dan rem belakang"
+    },
+    {
+      "number": "2",
+      "item": "Tekanan angin ban utama dan ban cadangan"
+    },
+    {
+      "number": "3",
+      "item": "Sistem penerangan meliputi lampu utama, lampu rem, dan lampu sein"
+    },
+    {
+      "number": "4",
+      "item": "Ketersediaan bahan bakar memadai untuk rute tujuan"
+    },
+    {
+      "number": "Kondisi Ruang Kabin dan Kargo",
+      "item": "Kondisi Ruang Kabin dan Kargo"
+    },
+    {
+      "number": "1",
+      "item": "Sistem pendingin udara ruang kabin dan kargo berfungsi baik"
+    },
+    {
+      "number": "2",
+      "item": "Kebersihan area kargo belakang"
+    },
+    {
+      "number": "3",
+      "item": "Sistem pengunci ganda pada pintu kargo berfungsi"
+    },
+    {
+      "number": "4",
+      "item": "Sabuk pengaman kargo tersedia dan layak pakai"
+    },
+    {
+      "number": "Sistem Tanggap Darurat",
+      "item": "Sistem Tanggap Darurat"
+    },
+    {
+      "number": "1",
+      "item": "Perangkat sistem pelacak lokasi aktif"
+    },
+    {
+      "number": "2",
+      "item": "Alat Pemadam Api Ringan siap pakai"
+    },
+    {
+      "number": "3",
+      "item": "Kotak Pertolongan Pertama Pada Kecelakaan tersedia"
+    },
+    {
+      "number": "4",
+      "item": "Peralatan penanganan tumpahan radiasi lengkap"
+    },
+    {
+      "number": "5",
+      "item": "Dosimeter saku dipakai oleh kurir dan dalam kondisi aktif"
+    }
+  ],
+  "internal_handover_checklist": [
+    {
+      "number": "1",
+      "item": "Seluruh produk telah berada di dalam wadah pelindung radiasi utama atau Kontainer Produk"
+    },
+    {
+      "number": "2",
+      "item": "Fisik kemasan pelindung radiasi dalam keadaan baik tanpa cacat fisik"
+    },
+    {
+      "number": "3",
+      "item": "Tutup wadah pelindung radiasi telah terpasang dengan sangat rapat"
+    }
+  ],
+  "delivery_order": {
+    "document_no": "IMS.SC.007-F-03",
+    "header_fields": [
+      "Batch No",
+      "Customer PO No.",
+      "Sales Order No.",
+      "Customer ID",
+      "Driver",
+      "Vehicle Plate No."
+    ],
+    "product_fields": [
+      "Product Name",
+      "Product Code",
+      "Calibration Date & Time",
+      "Expired Date & Time",
+      "Activity Order (mCi)",
+      "Packaging Categories (I-White / II-Yellow / III-Yellow)",
+      "Surface Dose Rate",
+      "Leadpot No.",
+      "UN No. (UN 2915)"
+    ]
+  }
+}

@@ -1,0 +1,75 @@
+<%- include('../partials/header', { title: 'Logistics Dispatch | Nuclea ERP - PT IMS' }) %>
+<%- include('../partials/sidebar', { page: 'logistics' }) %>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+
+    <main class="app-main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Logistics & Dispatch Control</h4>
+                <span class="text-muted small">Manage transport fleets, drivers, and delivery orders</span>
+            </div>
+            <button class="btn btn-sm btn-outline-dark fw-bold shadow-sm">
+                <i class="bi bi-car-front me-1"></i> Fleet Status
+            </button>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0 border-start border-warning border-4">
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-truck text-warning me-2"></i> Ready for Dispatch (Awaiting Courier)</h6>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light text-muted small text-uppercase">
+                                    <tr>
+                                        <th class="ps-4">Order Ref</th>
+                                        <th>Destination Hospital</th>
+                                        <th>Leadpot Shielding</th>
+                                        <th>Target Departure</th>
+                                        <th class="text-center">Docs</th>
+                                        <th class="pe-4 text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (dispatches && dispatches.length > 0) { %>
+                                        <% dispatches.forEach(dispatch => { %>
+                                        <tr>
+                                            <td class="ps-4 fw-bold text-primary"><%= dispatch.order_reference %></td>
+                                            <td class="fw-bold text-dark"><%= dispatch.hospital_name %></td>
+                                            <td>
+                                                <span class="fw-medium text-dark"><i class="bi bi-shield-shaded text-muted me-1"></i> <%= dispatch.asset_code %></span>
+                                                <div class="small text-muted" style="font-size: 0.7rem;">Activity: <%= dispatch.allocated_mci %> mCi</div>
+                                            </td>
+                                            <td class="text-danger fw-bold"><i class="bi bi-clock me-1"></i> <%= dispatch.dispatch_time %> WIB</td>
+                                            <td class="text-center">
+                                                <button class="btn btn-sm btn-light border text-muted" title="Print Delivery Order">
+                                                    <i class="bi bi-printer"></i> DO
+                                                </button>
+                                            </td>
+                                            <td class="pe-4 text-end">
+                                                <form action="/scm/logistics/dispatch/<%= dispatch.id %>" method="POST" class="d-inline">
+                                                    <button type="submit" class="btn btn-sm btn-dark fw-bold shadow-sm" onclick="return confirm('Confirm dispatch to <%= dispatch.hospital_name %>?');">
+                                                        <i class="bi bi-send-check me-1"></i> DISPATCH NOW
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                    <% } else { %>
+                                        <tr><td colspan="6" class="text-center py-5 text-muted"><i class="bi bi-truck-flatbed fs-1 d-block mb-3 opacity-50"></i>No packages are waiting for dispatch.</td></tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<%- include('../partials/footer') %>

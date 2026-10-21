@@ -1,0 +1,84 @@
+<%
+  const headerUser = (typeof user !== 'undefined' && user) ? user : {};
+  const headerNotifications = (typeof notifications !== 'undefined' && Array.isArray(notifications)) ? notifications : [];
+  const headerUnreadCount = (typeof unreadCount !== 'undefined') ? Number(unreadCount || 0) : headerNotifications.length;
+  const headerUserName = headerUser.full_name || headerUser.email || 'User';
+  const headerInitials = headerUserName.split(/\s+/).filter(Boolean).slice(0,2).map(part => part[0]).join('').toUpperCase() || 'U';
+  const pageKey = (typeof page !== 'undefined' ? page : '');
+  const crumbMap = {
+    dashboard:['Workspace','Dashboard'], 'roadmap-planning':['Manufacturing','Production Planning'], 'roadmap-execution':['Manufacturing','Production Execution'],
+    'roadmap-batch-records':['Manufacturing','Batch Record'], 'erp-batch-records':['Manufacturing','Batch Record'], 'roadmap-history':['Manufacturing','Production History'],
+    'roadmap-inventory':['Inventory','Inventory Overview'], 'erp-inventory-adjustment':['Inventory','Stock Movement Ledger'],
+    'roadmap-assets':['Asset Management','Asset Register'], 'roadmap-material-requisition':['Material Requisition','Requests & Verification'],
+    'roadmap-customers':['Customer Management','Customer Database'], 'roadmap-vendors':['Vendor Management','Vendor Database'],
+    'erp-distribution':['Distribution','Delivery'], 'driver-mobile':['Distribution','Live Tracking App'],
+    'security-control':['Security Control','Users, Roles & Audit'], 'roadmap-users':['Security Control','Users, Roles & Audit'],
+    'erp-audit':['Security Control','Users, Roles & Audit'], 'erp-access-control':['Security Control','Users, Roles & Audit'],
+    'erp-bom':['Manufacturing','Execution Material Rules'], 'erp-labels':['Manufacturing','Production Execution / Label Printing'],
+    'profile':['Account','My Profile'], 'search':['Workspace','Search Results'],
+    'assets':['Asset Management','Asset Register'], 'asset':['Asset Management','Asset Register'],
+    'inventory':['Inventory','Inventory Overview'], 'masterlist':['Inventory','Material Masterlist'],
+    'customer':['Customer Management','Customer Database'], 'vendor':['Vendor Management','Vendor Database'],
+    'distribution':['Distribution','Delivery'], 'history':['Manufacturing','Production History'],
+    'calculation':['Manufacturing','Calculation / Parameters'], 'schedule':['Manufacturing','Production Schedule'],
+    'order':['Manufacturing','Work Order'], 'pr':['Material Requisition','PR Register'], 'msr':['Material Requisition','Requests & Verification']
+  };
+  const crumbs = crumbMap[pageKey] || ['Workspace', 'Dashboard'];
+%>
+<header class="app-header border-bottom shadow-sm px-3 px-md-4 sticky-top">
+ <div class="header-utility-row">
+  <div class="header-leading-group">
+   <button class="btn btn-link d-lg-none p-0 text-body" id="mobileMenuBtn" type="button" aria-label="Open navigation"><i class="bi bi-list fs-2"></i></button>
+   <nav class="page-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a><i class="bi bi-chevron-right" style="font-size:.58rem"></i><a href="#" onclick="return false"><%= crumbs[0] %></a><i class="bi bi-chevron-right" style="font-size:.58rem"></i><span class="crumb-current text-truncate"><%= crumbs[1] %></span></nav>
+  </div>
+  <form action="/search" method="GET" class="header-search position-relative">
+   <i class="bi bi-search position-absolute top-50 translate-middle-y text-muted" style="left:14px;"></i>
+   <input type="search" name="q" class="form-control bg-body border ps-5 rounded-pill shadow-none" placeholder="Search batches, materials, customers, vendors…" aria-label="ERP search" required>
+  </form>
+  <div class="header-action-group d-flex align-items-center gap-2 gap-md-3">
+   <button type="button" class="btn btn-light border rounded-circle d-flex align-items-center justify-content-center" id="headerThemeButton" title="Toggle theme" aria-label="Toggle theme" style="width:38px;height:38px"><i class="bi bi-moon-stars"></i></button>
+   <script>document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('headerThemeButton');if(!b)return;const setIcon=()=>{b.innerHTML=document.documentElement.getAttribute('data-bs-theme')==='dark'?'<i class="bi bi-sun"></i>':'<i class="bi bi-moon-stars"></i>';};setIcon();b.addEventListener('click',()=>{const h=document.documentElement;const t=h.getAttribute('data-bs-theme')==='dark'?'light':'dark';h.setAttribute('data-bs-theme',t);localStorage.setItem('theme',t);setIcon();window.dispatchEvent(new Event('themeChanged'));});});</script>
+   <div class="dropdown">
+    <button type="button" class="btn btn-light border rounded-circle position-relative d-flex align-items-center justify-content-center" style="width:38px;height:38px;" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications"><i class="bi bi-bell"></i><% if(headerUnreadCount>0){ %><span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"><%= headerUnreadCount>9?'9+':headerUnreadCount %></span><% } %></button>
+    <div class="dropdown-menu dropdown-menu-end shadow-lg p-0 mt-2" style="width:min(360px,calc(100vw - 32px));max-height:440px;overflow:auto"><div class="d-flex justify-content-between align-items-center px-3 py-3 border-bottom"><strong>Notifications</strong><span class="badge text-bg-secondary"><%= headerUnreadCount %> unread</span></div><% if(headerNotifications.length){headerNotifications.forEach(n=>{ %><div class="dropdown-item-text px-3 py-3 border-bottom text-wrap"><div class="fw-semibold"><%= n.title||'ERP notification' %></div><div class="small text-muted mt-1"><%= n.message||'' %></div><% if(n.created_at){ %><div class="small text-muted mt-1"><%= new Date(n.created_at).toLocaleString('en-GB') %></div><% } %></div><% })}else{ %><div class="px-3 py-4 text-center"><i class="bi bi-bell-slash fs-4 text-muted"></i><div class="small text-muted mt-2">No new notifications.</div></div><% } %></div>
+   </div>
+   <div class="dropdown">
+    <button type="button" class="btn p-0 border-0 bg-transparent d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Account menu"><span class="text-end d-none d-sm-block"><span class="d-block fw-bold text-body" style="line-height:1.2;font-size:.83rem"><%= headerUserName %></span><span class="d-block text-muted small"><%= headerUser.role||'User' %></span></span><% if(headerUser.profile_photo){ %><img src="<%= headerUser.profile_photo %>" alt="Profile photo" class="rounded-circle border" style="width:38px;height:38px;object-fit:cover"><% }else{ %><span class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center fw-bold" style="width:38px;height:38px"><%= headerInitials %></span><% } %><i class="bi bi-chevron-down small text-muted d-none d-sm-inline"></i></button>
+    <ul class="dropdown-menu dropdown-menu-end shadow-lg mt-2 p-2" style="min-width:230px"><li class="px-2 py-2"><div class="small text-muted">Signed in as</div><div class="fw-semibold text-wrap"><%= headerUser.email||'-' %></div></li><li><hr class="dropdown-divider"></li><li><a class="dropdown-item rounded py-2" href="/profile"><i class="bi bi-person me-2"></i>My Profile</a></li><li><a class="dropdown-item rounded py-2" href="/profile?tab=security"><i class="bi bi-shield-lock me-2"></i>Account Security</a></li><li><a class="dropdown-item rounded py-2" href="/security-control"><i class="bi bi-shield-check me-2"></i>Security Control</a></li><li><a class="dropdown-item rounded py-2 text-danger" href="/auth/logout"><i class="bi bi-box-arrow-right me-2"></i>Sign out</a></li></ul>
+   </div>
+  </div>
+ </div>
+<style>
+.app-header .header-utility-row{
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) minmax(260px,min(34vw,420px)) auto;
+  align-items:center;
+  column-gap:1.25rem;
+  width:100%;
+  min-height:58px;
+}
+.header-leading-group{grid-column:1;min-width:0;display:flex;align-items:center;gap:.5rem}
+.page-breadcrumb{display:flex;align-items:center;gap:8px;min-width:0;white-space:nowrap;overflow:hidden;font-size:.76rem;color:var(--bs-secondary-color);flex:0 1 auto}
+.page-breadcrumb a{color:var(--bs-secondary-color);text-decoration:none;flex:0 0 auto}
+.page-breadcrumb a:hover{color:var(--bs-primary)}
+.page-breadcrumb .crumb-current{font-weight:700;color:var(--bs-emphasis-color);min-width:0}
+.header-search{grid-column:2;display:block !important;position:relative;width:100%;min-width:0;margin:0;flex:none}
+.header-search input{height:38px;width:100%;font-size:.8rem}
+.header-action-group{grid-column:3;display:flex !important;align-items:center;justify-content:flex-end;white-space:nowrap}
+#headerThemeButton,#headerThemeButton+script{flex-shrink:0}
+@media(max-width:991.98px){
+ .app-header .header-utility-row{grid-template-columns:minmax(0,1fr) auto;column-gap:.75rem;row-gap:.5rem;padding:.4rem 0}
+ .header-leading-group{grid-column:1;grid-row:1}
+ .header-action-group{grid-column:2;grid-row:1;gap:.4rem !important}
+ .header-search{grid-column:1 / -1;grid-row:2;width:100%;margin:0 0 .25rem}
+ .page-breadcrumb{font-size:.72rem;gap:6px}
+}
+@media(max-width:575.98px){
+ .app-header{padding-left:.75rem !important;padding-right:.75rem !important}
+ .header-action-group{gap:.25rem !important}
+ .header-action-group .btn{width:34px !important;height:34px !important}
+ .header-action-group .text-end{display:none !important}
+ .page-breadcrumb{font-size:.68rem;gap:4px}
+}
+</style>
+</header>

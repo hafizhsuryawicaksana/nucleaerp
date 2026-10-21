@@ -1,0 +1,156 @@
+<%- include('../partials/header', { title: 'Purchase Requisition | Nuclea ERP - PT IMS' }) %>
+<%- include('../partials/sidebar', { page: 'pr' }) %>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+
+    <main class="app-main">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Purchase Requisition (PR)</h4>
+                <span class="text-muted small">Official Document: <strong>Form IMS.FI.001-F-01</strong> Goods/Service Purchase Request</span>
+            </div>
+            <button class="btn btn-sm btn-dark fw-bold shadow-sm hover-elevate" data-bs-toggle="modal" data-bs-target="#createPrModal">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i> Draft New PR
+            </button>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-0 border-start border-success border-4 hover-elevate">
+                    <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-wallet2 text-success me-2"></i> Financial Approval Queue</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="prTable">
+                                <thead class="text-muted small text-uppercase">
+                                    <tr>
+                                        <th>Form / PR Number</th>
+                                        <th>Item & Specification</th>
+                                        <th>Recommended Vendor</th>
+                                        <th class="text-end">Est. Total Cost</th>
+                                        <th class="text-center">Finance Status</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if (prs && prs.length > 0) { %>
+                                        <% prs.forEach(pr => { %>
+                                        <tr>
+                                            <td>
+                                                <span class="d-block fw-bold text-primary"><%= pr.pr_number %></span>
+                                                <span class="small text-muted"><i class="bi bi-calendar-event me-1"></i> <%= new Date(pr.request_date).toLocaleDateString('en-GB') %></span>
+                                            </td>
+                                            <td>
+                                                <span class="d-block fw-bold text-dark"><%= pr.item_name %> <span class="badge bg-light text-dark border ms-1"><%= pr.quantity %> <%= pr.uom %></span></span>
+                                                <span class="d-block small text-muted text-truncate" style="max-width: 250px;" title="<%= pr.specification %>">Spec: <%= pr.specification %></span>
+                                            </td>
+                                            <td>
+                                                <span class="fw-medium text-dark"><i class="bi bi-building me-1 text-muted"></i> <%= pr.vendor_name || 'No Preference' %></span>
+                                            </td>
+                                            <td class="text-end text-danger fw-bolder">
+                                                Rp <%= Number(pr.total_price).toLocaleString('en-GB') %>
+                                            </td>
+                                            <td class="text-center">
+                                                <% if(pr.status === 'WAITING_FINANCE_APPROVAL') { %>
+                                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 px-2 py-1"><i class="bi bi-hourglass-split me-1"></i> Waiting Dir. Approval</span>
+                                                <% } else if(pr.status === 'APPROVED_BY_DIRECTOR') { %>
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1"><i class="bi bi-check-circle me-1"></i> Approved for PO</span>
+                                                <% } else { %>
+                                                    <span class="badge bg-secondary"><%= pr.status %></span>
+                                                <% } %>
+                                            </td>
+                                            <td class="text-end">
+                                                <% if(pr.status === 'WAITING_FINANCE_APPROVAL') { %>
+                                                    <form action="/procurement/pr/approve/<%= pr.id %>" method="POST" class="d-inline">
+                                                        <button type="submit" class="btn btn-sm btn-success fw-bold shadow-sm hover-elevate" onclick="return confirm('Authorize budget for this PR?');" title="Simulate Director Approval">
+                                                            <i class="bi bi-check2"></i> Auth
+                                                        </button>
+                                                    </form>
+                                                <% } else { %>
+                                                    <button class="btn btn-sm btn-light border text-primary" title="Print PR Form (IMS.FI.001-F-01)">
+                                                        <i class="bi bi-printer"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-dark fw-bold hover-elevate" title="Generate Purchase Order (PO)">
+                                                        Make PO <i class="bi bi-arrow-right-short"></i>
+                                                    </button>
+                                                <% } %>
+                                            </td>
+                                        </tr>
+                                        <% }) %>
+                                    <% } %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="modal fade" id="createPrModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-file-earmark-spreadsheet text-warning me-2"></i> Goods/Service Purchase Request (IMS.FI.001-F-01)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/procurement/pr/add" method="POST">
+                <div class="modal-body p-4 bg-light">
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4"><label class="form-label small fw-bold text-muted">PR Document Number</label><input type="text" name="pr_number" class="form-control border-secondary" placeholder="e.g. PR-IMS-001" required></div>
+                        <div class="col-md-4"><label class="form-label small fw-bold text-muted">Request Date</label><input type="date" name="request_date" class="form-control border-secondary" required></div>
+                        <div class="col-md-4"><label class="form-label small fw-bold text-muted">Departemen Pemohon</label><input type="text" name="department" class="form-control border-secondary" value="Supply Chain Management" readonly></div>
+                    </div>
+
+                    <div class="bg-white p-3 rounded border border-dashed mb-4">
+                        <h6 class="fw-bold text-primary mb-3">Item Details & Estimated Cost</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6"><label class="form-label small fw-bold text-muted">Item / Service Name</label><input type="text" name="item_name" class="form-control border-secondary" placeholder="e.g. Mannose Triflate Precursor" required></div>
+                            <div class="col-md-6"><label class="form-label small fw-bold text-muted">Spesifikasi Detail</label><input type="text" name="specification" class="form-control border-secondary" placeholder="e.g. Grade GMP, 25mg/vial" required></div>
+                            
+                            <div class="col-md-3"><label class="form-label small fw-bold text-muted">Quantity</label><input type="number" step="0.01" name="quantity" class="form-control border-secondary" placeholder="0" required></div>
+                            <div class="col-md-3"><label class="form-label small fw-bold text-muted">Satuan</label><input type="text" name="uom" class="form-control border-secondary" placeholder="Pcs/Vial/Set" required></div>
+                            <div class="col-md-6"><label class="form-label small fw-bold text-muted">Est. Price Satuan (Rp)</label><input type="number" name="est_unit_price" class="form-control border-secondary" placeholder="e.g. 1500000" required></div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Recommended Vendor (per AVL)</label>
+                            <select name="vendor_id" class="form-select border-secondary">
+                                <option value="">-- Select vendor (optional) --</option>
+                                <% if(vendors.length > 0) { %>
+                                    <% vendors.forEach(v => { %>
+                                        <option value="<%= v.id %>"><%= v.vendor_code %> - <%= v.name %></option>
+                                    <% }) %>
+                                <% } %>
+                            </select>
+                        </div>
+                        <div class="col-md-6"><label class="form-label small fw-bold text-muted">Purpose / Procurement Details</label><textarea name="purpose" class="form-control border-secondary" rows="2" placeholder="Jelaskan urgensi pengadaan..." required></textarea></div>
+                    </div>
+
+                </div>
+                <div class="modal-footer bg-white"><button type="submit" class="btn btn-dark fw-bold px-4 w-100">SUBMIT FORM IMS.FI.001-F-01</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const t = document.getElementById('prTable');
+        if (t) {
+            new simpleDatatables.DataTable(t, {
+                searchable: true,
+                fixedHeight: true,
+                perPage: 10
+            });
+        }
+    });
+</script>
+
+<%- include('../partials/footer') %>

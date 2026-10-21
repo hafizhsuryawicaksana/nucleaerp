@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Login | Nuclea ERP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            margin: 0;
+            padding: 20px;
+            /* BACKGROUND GAMBAR MENYESUAIKAN FULL LAYAR */
+            background-image: url('/background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #181C32;
+        }
+
+        /* KOTAK FORMULIR DI TENGAH DENGAN TEMA PUTIH BERSIH */
+        .center-card { 
+            width: 100%; 
+            max-width: 440px; 
+            background: #ffffff; 
+            border-radius: 12px; 
+            box-shadow: 0 15px 35px rgba(37, 99, 235, 0.08); 
+            padding: 2.5rem; 
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #181C32;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        /* INPUT FORM (LIGHT MODE BERSIH) */
+        .form-group {
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .form-control, .form-select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #181C32;
+            background-color: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            outline: none;
+        }
+        .form-control::placeholder { color: #94a3b8; }
+        
+        /* Tombol Show/Hide Password */
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 38px;
+            background: none;
+            border: none;
+            color: #64748b;
+            cursor: pointer;
+            padding: 0;
+            transition: color 0.2s;
+        }
+        .password-toggle:hover { color: #2563eb; }
+
+        /* TOMBOL UTAMA (BLUE SOLID) */
+        .btn-submit {
+            width: 100%;
+            padding: 0.9rem;
+            background-color: #2563eb;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            margin-top: 1rem;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        .auth-link {
+            color: #2563eb;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .auth-link:hover { text-decoration: underline; color: #1d4ed8; }
+
+        .alert-custom-danger { background-color: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+        .alert-custom-success { background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+    </style>
+</head>
+<body>
+
+<div class="center-card">
+    
+    <!-- LOGO DI ATAS TENGAH -->
+    <div class="text-center mb-4">
+        <a href="#" class="text-decoration-none d-inline-block">
+            <img src="/logo.png" alt="Logo PT IMS" class="img-fluid" style="max-height: 65px; object-fit: contain;">
+        </a>
+    </div>
+
+    <h1 class="page-title text-center">Log in to your Account</h1>
+    <p class="page-subtitle text-center">Welcome back! Please enter your details.</p>
+
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-custom-danger d-flex align-items-center p-3 mb-4 rounded-3 small">
+            <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
+            <span class="fw-medium"><%= error %></span>
+        </div>
+    <% } %>
+
+    <% if (typeof query !== 'undefined' && query.status === 'success') { %>
+        <div class="alert alert-custom-success d-flex align-items-center p-3 mb-4 rounded-3 small">
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            <span class="fw-medium">Registration successful! You may now log in.</span>
+        </div>
+    <% } %>
+
+    <form action="/auth/login" method="POST">
+        
+        <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" class="form-control" placeholder="employee@ims-facility.com" required autocomplete="email" autofocus>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <input type="password" name="password" id="passwordInput" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="password-toggle" id="togglePassword">
+                <i class="bi bi-eye-slash" id="toggleIcon"></i>
+            </button>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3 mb-4 small">
+            <div class="form-check m-0 d-flex align-items-center">
+                <input class="form-check-input shadow-none mt-0 me-2" type="checkbox" id="rememberMe" style="width: 16px; height: 16px;">
+                <label class="form-check-label fw-medium text-secondary" for="rememberMe" style="cursor: pointer;">
+                    Remember me
+                </label>
+            </div>
+            <a href="#" class="auth-link">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn-submit">Log in</button>
+
+    </form>
+
+    <div class="text-center mt-4 small">
+        <span class="text-muted">Don't have an account? </span>
+        <a href="/auth/signup" class="auth-link">Create an account</a>
+    </div>
+    
+</div>
+
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const passInput = document.getElementById('passwordInput');
+        const icon = document.getElementById('toggleIcon');
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            icon.classList.replace('bi-eye-slash', 'bi-eye');
+        } else {
+            passInput.type = 'password';
+            icon.classList.replace('bi-eye', 'bi-eye-slash');
+        }
+    });
+</script>
+
+</body>
+</html>

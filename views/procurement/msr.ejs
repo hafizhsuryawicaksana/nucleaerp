@@ -1,0 +1,51 @@
+<%- include('../partials/header', { title: 'Material Requisition | Nuclea ERP' }) %>
+<%- include('../partials/sidebar', { page: 'msr' }) %>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+
+    <main class="app-main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Material Requisition (MSR)</h4>
+                <span class="text-muted small">Internal inter-departmental request routing.</span>
+            </div>
+            <button class="btn btn-dark fw-bold shadow-sm hover-elevate">
+                <i class="bi bi-cart-plus me-2 text-warning"></i> Draft MSR
+            </button>
+        </div>
+
+        <div class="card shadow-sm border-0 border-start border-warning border-4 hover-elevate">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-enterprise mb-0" id="msrTable">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">MSR Number</th>
+                                <th>Item Description</th>
+                                <th>Req. Dept</th>
+                                <th class="text-center">Status</th>
+                                <th class="pe-4 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-4 fw-bold text-primary">MSR-260901</td>
+                                <td>
+                                    <span class="d-block fw-bold text-dark">Acetonitrile ACS Grade <span class="badge bg-light text-dark border ms-1">5 Liters</span></span>
+                                    <span class="small text-danger fw-bold">Due: 30 Sep 2026</span>
+                                </td>
+                                <td><span class="small text-muted fw-bold">Quality Control (QC)</span></td>
+                                <td class="text-center"><span class="badge bg-warning bg-opacity-10 text-warning border border-warning px-3 py-2">PENDING MGR</span></td>
+                                <td class="pe-4 text-end"><button class="btn btn-sm btn-outline-success fw-bold hover-elevate"><i class="bi bi-check2"></i> Approve</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>document.addEventListener('DOMContentLoaded', () => { const t = document.getElementById('msrTable'); if(t) new simpleDatatables.DataTable(t); });</script>
+<%- include('../partials/footer') %>

@@ -1,0 +1,48 @@
+<%- include('../partials/header', { title: 'Vendor Management | Nuclea ERP' }) %>
+<%- include('../partials/sidebar', { page: 'vendor' }) %>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+
+    <main class="app-main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Approved Vendor List (AVL)</h4>
+                <span class="text-muted small">CPOB QA.004 Qualification Standard Database.</span>
+            </div>
+            <button class="btn btn-dark fw-bold shadow-sm hover-elevate">
+                <i class="bi bi-ui-checks me-2 text-warning"></i> Evaluate Vendor
+            </button>
+        </div>
+
+        <div class="card shadow-sm border-0 border-start border-info border-4 hover-elevate">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-enterprise mb-0" id="vendorTable">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Vendor Name</th>
+                                <th>Category</th>
+                                <th>Contact Person</th>
+                                <th class="text-center">QA Status</th>
+                                <th class="pe-4 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark fs-6">PT GE Healthcare</td>
+                                <td><span class="badge bg-light text-dark border">Consumables</span></td>
+                                <td><span class="small text-muted fw-bold"><i class="bi bi-person me-1"></i> Budi (0812)</span></td>
+                                <td class="text-center"><span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2"><i class="bi bi-patch-check me-1"></i> QUALIFIED</span></td>
+                                <td class="pe-4 text-end"><button class="btn btn-sm btn-light border text-primary hover-elevate"><i class="bi bi-eye"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>document.addEventListener('DOMContentLoaded', () => { const t = document.getElementById('vendorTable'); if(t) new simpleDatatables.DataTable(t); });</script>
+<%- include('../partials/footer') %>

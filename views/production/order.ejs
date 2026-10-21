@@ -1,0 +1,102 @@
+<%- include('../partials/header', { title: 'Production Execution | Nuclea ERP' }) %>
+<%- include('../partials/sidebar', { page: 'order' }) %>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+    
+    <main class="app-main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Production Execution (SCADA)</h4>
+                <span class="text-muted small">Live execution, Cyclotron telemetry, and BOM deduction (Goods Issue).</span>
+            </div>
+            <button class="btn btn-dark fw-bold shadow-sm hover-elevate" data-bs-toggle="modal" data-bs-target="#execModal">
+                <i class="bi bi-rocket-takeoff me-2 text-warning"></i> Launch Batch
+            </button>
+        </div>
+
+        <div class="card shadow-sm border-0 border-start border-warning border-4 hover-elevate">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-cpu text-warning me-2"></i> Active Production Orders</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-enterprise mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Batch ID</th>
+                                <th>Telemetry Parameters</th>
+                                <th>BOM Status</th>
+                                <th>Status</th>
+                                <th class="pe-4 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="ps-4 fw-bold text-primary fs-6">FDG-260901</td>
+                                <td>
+                                    <span class="d-block small text-dark fw-bold"><i class="bi bi-lightning-charge text-warning"></i> 40 µA / 120 Min</span>
+                                    <span class="small text-muted">Cleanroom: 20.5°C | 15 Pa</span>
+                                </td>
+                                <td><span class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check2"></i> Mvmt 261 (Issued)</span></td>
+                                <td><span class="badge bg-warning text-dark pulse-warning px-3 py-2 fw-bold">SYNTHESIS...</span></td>
+                                <td class="pe-4 text-end">
+                                    <button class="btn btn-sm btn-success fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#qcModal"><i class="bi bi-check-circle"></i> Input EOB & QC</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal Execute -->
+<div class="modal fade" id="execModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-rocket-takeoff text-warning me-2"></i> Launch Production & GI</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="#" method="POST">
+                <div class="modal-body p-4 bg-light">
+                    <div class="alert alert-warning small fw-bold"><i class="bi bi-exclamation-triangle"></i> This action will automatically deduct BOM materials from Inventory.</div>
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label small fw-bold">Batch ID</label><input type="text" class="form-control" value="FDG-260902" readonly></div>
+                        <div class="col-md-6"><label class="form-label small fw-bold">Beam Current (µA)</label><input type="number" class="form-control" required></div>
+                        <div class="col-md-6"><label class="form-label small fw-bold">Temp (°C)</label><input type="number" class="form-control" required></div>
+                        <div class="col-md-6"><label class="form-label small fw-bold">Pressure (Pa)</label><input type="number" class="form-control" required></div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white"><button type="submit" class="btn btn-dark fw-bold w-100">LAUNCH BATCH</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal QC -->
+<div class="modal fade" id="qcModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title fw-bold">QC Clearance & Yield (EOB)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="#" method="POST">
+                <div class="modal-body p-4 bg-light">
+                    <div class="row g-3">
+                        <div class="col-12"><label class="form-label small fw-bold">Actual EOB Time</label><input type="datetime-local" class="form-control" required></div>
+                        <div class="col-12"><label class="form-label small fw-bold">Raw Yield (mCi)</label><input type="number" class="form-control" required></div>
+                        <div class="col-6"><label class="form-label small fw-bold">pH</label><input type="text" class="form-control" required></div>
+                        <div class="col-6"><label class="form-label small fw-bold">Purity (%)</label><input type="number" class="form-control" required></div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white"><button type="submit" class="btn btn-success fw-bold w-100">COMPLETE BATCH</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

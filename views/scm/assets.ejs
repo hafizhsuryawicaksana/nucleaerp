@@ -1,0 +1,130 @@
+<%- include('../partials/header', { title: 'Asset Management | Nuclea ERP' }) %>
+<%- include('../partials/sidebar', { page: 'assets' }) %>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+
+    <main class="app-main">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Asset Masterlist & Inventory</h4>
+                <span class="text-muted small">Based on SOP IMS.SC.002 and Asset Masterlist Appendix 1</span>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-dark fw-bold bg-white shadow-sm" onclick="window.print()">
+                    <i class="bi bi-printer text-primary me-2"></i> Print Barcodes
+                </button>
+                <button class="btn btn-dark fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#registerAssetModal">
+                    <i class="bi bi-plus-circle text-warning me-2"></i> Register New Asset
+                </button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0 hover-elevate">
+            <div class="card-header bg-transparent border-bottom py-3 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-pc-display-horizontal text-primary me-2"></i> Fixed & Low Value Assets</h6>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="assetTable">
+                        <thead class="text-muted small text-uppercase bg-light">
+                            <tr>
+                                <th>Asset Code & Label</th>
+                                <th>Asset Name & Klasifikasi</th>
+                                <th>Location / Departemen</th>
+                                <th>Status Peminjaman</th>
+                                <th>Tgl. Kalibrasi / Opname</th>
+                                <th class="text-end pe-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <span class="d-block fw-bold text-primary">PR25003</span>
+                                    <span class="small text-muted"><i class="bi bi-upc-scan me-1"></i> Tagged</span>
+                                </td>
+                                <td>
+                                    <span class="d-block fw-bold text-dark">Mesin Hot Cell Sintesis</span>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border mt-1">Fixed Asset</span>
+                                </td>
+                                <td>
+                                    <span class="d-block small fw-bold text-dark">Cleanroom / Production</span>
+                                    <span class="small text-muted">PIC: Hadi S.</span>
+                                </td>
+                                <td><span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1"><i class="bi bi-check-circle me-1"></i> AVAILABLE</span></td>
+                                <td class="text-danger fw-medium small">15 Nov 2026</td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-light border text-primary" title="Form Mutasi Aset (F-02)"><i class="bi bi-arrow-left-right"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class="d-block fw-bold text-primary">SC25012</span>
+                                    <span class="small text-muted"><i class="bi bi-upc-scan me-1"></i> Tagged</span>
+                                </td>
+                                <td>
+                                    <span class="d-block fw-bold text-dark">Tungsten Leadpot 30ml</span>
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info mt-1">Low Value Asset</span>
+                                </td>
+                                <td>
+                                    <span class="d-block small fw-bold text-dark">Dispensing Room / SCM</span>
+                                    <span class="small text-muted">PIC: Logistik Dept.</span>
+                                </td>
+                                <td><span class="badge bg-warning text-dark px-2 py-1 fw-bold"><i class="bi bi-person-up me-1"></i> BORROWED (Distribusi)</span></td>
+                                <td class="text-dark fw-medium small">Stock Opname: OK</td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-light border text-warning" title="Form Peminjaman (F-07)"><i class="bi bi-journal-arrow-up"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL REGISTER ASSET -->
+<div class="modal fade" id="registerAssetModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white py-3">
+                <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle text-warning me-2"></i> Asset Registration (IMS.SC.002)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="#" method="POST">
+                <div class="modal-body p-4 bg-light">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Asset Code Format (AABBCCC)</label>
+                        <input type="text" class="form-control border-secondary" placeholder="e.g. PR25003 (Productsi, 2025, Urutan 3)" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Asset Name</label>
+                        <input type="text" class="form-control border-secondary" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Klasifikasi</label>
+                        <select class="form-select border-secondary">
+                            <option>Fixed Asset (Mesin/Bangunan)</option>
+                            <option>Low Value Asset (Leadpot/Alat Kecil)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Departemen Pemilik</label>
+                        <select class="form-select border-secondary">
+                            <option>Production (PR)</option>
+                            <option>Quality Control (QC)</option>
+                            <option>Supply Chain (SC)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white">
+                    <button type="submit" class="btn btn-dark fw-bold w-100">SAVE & GENERATE LABEL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>document.addEventListener('DOMContentLoaded', () => { const t = document.getElementById('assetTable'); if(t) new simpleDatatables.DataTable(t); });</script>
+<%- include('../partials/footer') %>

@@ -1,0 +1,353 @@
+<%- include('partials/header', { title: 'Account Settings - Nuclea ERP' }) %>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+
+<%- include('partials/sidebar') %>
+
+<div class="app-wrapper">
+    <%- include('partials/headbar') %>
+    
+    <main class="app-main">
+        <div class="container-fluid">
+            
+            <div class="mb-4 d-flex justify-content-between align-items-end">
+                <div>
+                    <h4 class="fw-bold text-dark mb-1">Account Settings</h4>
+                    <p class="text-muted small mb-0">Manage your profile, account preferences, and security configurations.</p>
+                </div>
+                <% if (typeof success !== 'undefined' && success) { %>
+                    <span class="badge bg-success px-3 py-2 fs-7"><i class="bi bi-check-circle me-1"></i> <%= success %></span>
+                <% } %>
+                <% if (typeof error !== 'undefined' && error) { %>
+                    <span class="badge bg-danger px-3 py-2 fs-7"><i class="bi bi-exclamation-triangle me-1"></i> <%= error %></span>
+                <% } %>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm p-2">
+                        <div class="list-group list-group-flush">
+                            <a href="/profile?tab=profile" class="list-group-item list-group-item-action border-0 mb-1 <%= tab === 'profile' ? 'active bg-light text-dark fw-bold rounded border-start border-warning border-4' : 'text-muted' %>">
+                                <i class="bi bi-person me-2"></i> My Profile
+                            </a>
+                            <a href="/profile?tab=account" class="list-group-item list-group-item-action border-0 mb-1 <%= tab === 'account' ? 'active bg-light text-dark fw-bold rounded border-start border-warning border-4' : 'text-muted' %>">
+                                <i class="bi bi-wallet2 me-2"></i> My Account
+                            </a>
+                            <a href="/profile?tab=security" class="list-group-item list-group-item-action border-0 <%= tab === 'security' ? 'active bg-light text-dark fw-bold rounded border-start border-warning border-4' : 'text-muted' %>">
+                                <i class="bi bi-shield-lock me-2"></i> Security
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4 p-md-5">
+                            
+                            <!-- TAB 1: MY PROFILE -->
+                            <% if (tab === 'profile') { %>
+                                <h5 class="fw-bold mb-4">Personal & HR Information</h5>
+                                
+                                <div class="d-flex align-items-center mb-5 pb-4 border-bottom dashed">
+                                    <div class="position-relative">
+                                        <% if (user.profile_photo) { %>
+                                            <img src="<%= user.profile_photo %>" alt="Avatar" class="rounded-circle shadow" style="width: 120px; height: 120px; object-fit: cover; border: 4px solid #fff;">
+                                        <% } else { %>
+                                            <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 120px; height: 120px; font-size: 2.5rem;">
+                                                <%= user.full_name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase() %>
+                                            </div>
+                                        <% } %>
+                                        
+                                        <form id="uploadPhotoForm" action="/profile/upload-photo" method="POST">
+                                            <input type="hidden" name="cropped_image" id="croppedImageBase64">
+                                        </form>
+                                    </div>
+                                    
+                                    <div class="ms-4">
+                                        <h6 class="fw-bold mb-1">Profile Picture</h6>
+                                        <p class="text-muted small mb-3">Upload a professional photo. PNG or JPG under 2MB.</p>
+                                        <label for="avatarInput" class="btn btn-dark btn-sm fw-bold px-3 cursor-pointer">
+                                            <i class="bi bi-camera me-1"></i> Upload & Crop
+                                        </label>
+                                        <input type="file" id="avatarInput" class="d-none" accept="image/png, image/jpeg">
+                                    </div>
+                                </div>
+
+                                <div class="card border shadow-sm mb-4">
+                                    <div class="card-body p-3 p-md-4">
+                                        <div class="d-flex flex-wrap align-items-center gap-3">
+                                            <div style="min-width:140px">
+                                                <div class="small text-muted fw-bold text-uppercase mb-2">Digital Signature Image</div>
+                                                <% if (user.digital_signature_file_id) { %>
+                                                    <img src="/account/digital-signature/<%= user.id %>" alt="Digital signature" class="border rounded bg-white p-2" style="max-width:220px;max-height:90px;object-fit:contain">
+                                                <% } else { %>
+                                                    <div class="border border-dashed rounded text-muted small p-3">Not uploaded</div>
+                                                <% } %>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="fw-bold mb-1">Upload a signature for ERP documents</h6>
+                                                <p class="text-muted small mb-2">PNG/JPG/WebP, maksimum 3 MB. Gambar tanda tangan hanya aset visual; approval tetap harus melewati kewenangan, autentikasi/PIN, dan audit trail pada workflow terkait.</p>
+                                                <form action="/account/digital-signature" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center">
+                                                    <input type="file" name="digital_signature" class="form-control form-control-sm" style="max-width:320px" accept="image/png,image/jpeg,image/webp" required>
+                                                    <button type="submit" class="btn btn-sm btn-primary"><i class="bi bi-pen me-1"></i>Save Signature</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <form action="/profile/update-info" method="POST">
+                                    <h6 class="fw-bold text-uppercase text-muted small mb-3">Professional Identity</h6>
+                                    <div class="row g-3 mb-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold text-dark">Full Name</label>
+                                            <input type="text" name="full_name" class="form-control" value="<%= user.full_name %>" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold text-dark">Official Role</label>
+                                            <input type="text" class="form-control bg-light" value="<%= user.role %>" readonly><div class="form-text">Roles can only be changed by an administrator through Security Control.</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold text-dark">Employee ID (NIK)</label>
+                                            <input type="text" class="form-control bg-light" value="IMS-<%= new Date().getFullYear() %>-<%= user.id.toString().padStart(3, '0') %>" readonly>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-bold text-dark">Department</label>
+                                            <input type="text" name="department" class="form-control" value="<%= user.department || '' %>" placeholder="e.g. Supply Chain">
+                                        </div>
+                                    </div>
+
+                                    <h6 class="fw-bold text-uppercase text-muted small mb-3">Contact Details</h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold text-dark">Personal Phone</label>
+                                            <input type="text" name="phone" class="form-control" value="<%= user.phone || '' %>" placeholder="+62 812 3456 7890">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold text-dark">Emergency Contact</label>
+                                            <input type="text" name="emergency_contact" class="form-control" value="<%= user.emergency_contact || '' %>" placeholder="Relation & Phone Number">
+                                        </div>
+                                        <div class="col-12 mt-4 text-end">
+                                            <button type="submit" class="btn btn-warning fw-bold px-4">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
+
+                            <!-- TAB 2: MY ACCOUNT -->
+                            <% } else if (tab === 'account') { %>
+                                <h5 class="fw-bold mb-4">Account Configurations</h5>
+                                
+                                <h6 class="fw-bold text-uppercase text-muted small mb-3">Email Verification</h6>
+                                <div class="row g-3 align-items-center mb-5 pb-4 border-bottom dashed">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold text-dark">Corporate Email</label>
+                                        <input type="email" class="form-control bg-light" value="<%= user.email %>" readonly>
+                                    </div>
+                                    <div class="col-md-6 mt-4 pt-2">
+                                        <% if (user.is_email_verified) { %>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 fw-bold"><i class="bi bi-check-circle me-1"></i> Verified</span>
+                                        <% } else { %>
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning px-3 py-2 fw-bold me-2"><i class="bi bi-exclamation-circle me-1"></i> Unverified</span>
+                                            <form action="/profile/verify-email" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-dark fw-bold">Request OTP & Verify</button>
+                                            </form>
+                                        <% } %>
+                                    </div>
+                                </div>
+
+                                <form action="/profile/update-preferences" method="POST">
+                                    <h6 class="fw-bold text-uppercase text-muted small mb-3">System Preferences</h6>
+                                    <div class="row g-3 mb-5 pb-4 border-bottom dashed">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold text-dark">System Language</label>
+                                            <select name="language" class="form-select">
+                                                <option value="en" <%= user.language === 'en' ? 'selected' : '' %>>English (US) - Default</option>
+                                                <option value="id" <%= user.language === 'id' ? 'selected' : '' %>>Bahasa Indonesia</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold text-dark">Timezone (Crucial for EOB/Dispatch)</label>
+                                            <select name="timezone" class="form-select">
+                                                <option value="Asia/Jakarta" <%= user.timezone === 'Asia/Jakarta' ? 'selected' : '' %>>(GMT+07:00) Western Indonesia Time (WIB)</option>
+                                                <option value="Asia/Makassar" <%= user.timezone === 'Asia/Makassar' ? 'selected' : '' %>>(GMT+08:00) Central Indonesia Time (WITA)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <h6 class="fw-bold text-uppercase text-muted small mb-3">Notification Settings</h6>
+                                    <div class="form-check form-switch mb-2">
+                                        <input class="form-check-input" type="checkbox" name="email_notif" id="emailNotif" <%= user.email_notif ? 'checked' : '' %>>
+                                        <label class="form-check-label fw-bold fs-7" for="emailNotif">Email Alerts</label>
+                                        <div class="text-muted" style="font-size: 0.75rem;">Receive emails for PR approvals and QC rejections.</div>
+                                    </div>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="push_notif" id="pushNotif" <%= user.push_notif ? 'checked' : '' %>>
+                                        <label class="form-check-label fw-bold fs-7" for="pushNotif">In-App Push Alerts</label>
+                                        <div class="text-muted" style="font-size: 0.75rem;">Real-time notifications for active batch status.</div>
+                                    </div>
+                                    <div class="mt-4 text-end">
+                                        <button type="submit" class="btn btn-warning fw-bold px-4">Save Preferences</button>
+                                    </div>
+                                </form>
+
+                            <!-- TAB 3: SECURITY -->
+                            <% } else if (tab === 'security') { %>
+                                <h5 class="fw-bold mb-4">Security & Authentication</h5>
+                                
+                                <div class="row g-4">
+                                    <div class="col-md-6 border-end dashed pe-4">
+                                        <h6 class="fw-bold text-uppercase text-muted small mb-3">Change Password</h6>
+                                        <form action="/profile/change-password" method="POST">
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-dark">Current Password</label>
+                                                <input type="password" name="current_password" class="form-control" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-dark">New Password</label>
+                                                <input type="password" name="new_password" class="form-control" placeholder="Min. 8 chars, 1 uppercase" required>
+                                            </div>
+                                            <button type="submit" class="btn btn-dark btn-sm fw-bold px-4">Update Password</button>
+                                        </form>
+
+                                        <hr class="dashed my-4">
+
+                                        <h6 class="fw-bold text-uppercase text-muted small mb-3">Electronic Signature PIN</h6>
+                                        <p class="text-muted" style="font-size: 0.75rem;">Required for GMP/FDA compliance when approving documents (PR, MSR, QC Release).</p>
+                                        <form action="/profile/set-pin" method="POST" class="input-group input-group-sm mb-3" style="max-width: 250px;">
+                                            <input type="password" name="pin" class="form-control text-center tracking-widest fw-bold" placeholder="<%= user.pin ? 'PIN SET' : '• • • • • •' %>" maxlength="6" required>
+                                            <button class="btn btn-warning fw-bold" type="submit"><%= user.pin ? 'Change PIN' : 'Set PIN' %></button>
+                                        </form>
+                                    </div>
+
+                                    <div class="col-md-6 ps-4">
+                                        <h6 class="fw-bold text-uppercase text-muted small mb-3">Two-Factor Authentication (2FA)</h6>
+                                        <div class="card bg-light border-0 mb-4 p-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <% if (user.is_2fa_enabled) { %>
+                                                        <div class="fw-bold fs-7 text-dark"><i class="bi bi-shield-check text-success me-1"></i> 2FA is Enabled</div>
+                                                    <% } else { %>
+                                                        <div class="fw-bold fs-7 text-dark"><i class="bi bi-shield-x text-danger me-1"></i> 2FA is Disabled</div>
+                                                    <% } %>
+                                                    <div class="text-muted" style="font-size: 0.7rem;">Protect your account with an Authenticator App.</div>
+                                                </div>
+                                                <form action="/profile/toggle-2fa" method="POST">
+                                                    <button type="submit" class="btn btn-<%= user.is_2fa_enabled ? 'danger' : 'outline-dark' %> btn-sm fw-bold">
+                                                        <%= user.is_2fa_enabled ? 'Disable' : 'Enable' %>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                        <h6 class="fw-bold text-uppercase text-muted small mb-3">Login Audit Trail</h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-borderless fs-8">
+                                                <thead class="border-bottom dashed">
+                                                    <tr>
+                                                        <th class="text-muted pb-2">Device/IP</th>
+                                                        <th class="text-muted pb-2 text-end">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <% if (typeof trails !== 'undefined' && trails.length > 0) { %>
+                                                        <% trails.forEach(t => { %>
+                                                            <tr>
+                                                                <td class="pt-2 fw-bold text-truncate" style="max-width: 150px;" title="<%= t.browser_info %>">
+                                                                    <%= t.browser_info.substring(0,20) %>...<br>
+                                                                    <span class="text-muted fw-normal"><%= t.device_ip %> | <%= new Date(t.created_at).toLocaleString() %></span>
+                                                                </td>
+                                                                <td class="pt-2 text-end">
+                                                                    <% if (t.status === 'SUCCESS') { %>
+                                                                        <span class="badge bg-success bg-opacity-10 text-success border border-success">Success</span>
+                                                                    <% } else { %>
+                                                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger">Failed</span>
+                                                                    <% } %>
+                                                                </td>
+                                                            </tr>
+                                                        <% }) %>
+                                                    <% } else { %>
+                                                        <tr><td colspan="2" class="text-muted text-center py-2">No login data yet.</td></tr>
+                                                    <% } %>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="modal fade" id="cropModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-bottom dashed">
+                <h5 class="modal-title fw-bold">Adjust Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="img-container" style="max-height: 400px; width: 100%; margin: 0 auto; background-color: #f8f9fa;">
+                    <img id="imageToCrop" src="" alt="Picture" style="max-width: 100%; display: block;">
+                </div>
+                <p class="text-muted small mt-3 mb-0"><i class="bi bi-arrows-move me-1"></i> Drag to move, scroll to zoom.</p>
+            </div>
+            <div class="modal-footer border-top dashed bg-light">
+                <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary fw-bold" id="cropAndSaveBtn">Crop & Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const avatarInput = document.getElementById('avatarInput');
+        if (!avatarInput) return;
+
+        let cropper;
+        const imageToCrop = document.getElementById('imageToCrop');
+        const cropModalEl = document.getElementById('cropModal');
+        const cropModal = new bootstrap.Modal(cropModalEl);
+        
+        avatarInput.addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    imageToCrop.src = event.target.result;
+                    cropModal.show();
+                };
+                reader.readAsDataURL(files[0]);
+            }
+        });
+
+        cropModalEl.addEventListener('shown.bs.modal', function() {
+            cropper = new Cropper(imageToCrop, {
+                aspectRatio: 1, viewMode: 2, dragMode: 'move', autoCropArea: 0.8,
+                guides: true, center: true, highlight: false, cropBoxMovable: true, cropBoxResizable: true,
+            });
+        });
+
+        cropModalEl.addEventListener('hidden.bs.modal', function() {
+            if (cropper) { cropper.destroy(); cropper = null; }
+            avatarInput.value = ''; 
+        });
+
+        document.getElementById('cropAndSaveBtn').addEventListener('click', function() {
+            if (!cropper) return;
+            const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
+            document.getElementById('croppedImageBase64').value = canvas.toDataURL('image/jpeg', 0.9);
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Saving...';
+            this.disabled = true;
+            document.getElementById('uploadPhotoForm').submit();
+        });
+    });
+</script>

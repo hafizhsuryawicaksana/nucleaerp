@@ -1,0 +1,464 @@
+<%- include('../partials/header', { title: 'Production Planning & Schedule | Nuclea ERP' }) %>
+<%- include('../partials/sidebar', { page: 'schedule' }) %>
+
+<style>
+    /* Typography & Colors */
+    .text-slate { color: #64748b; }
+    
+    /* Calendar Grid - UX Professional (Modern SaaS) */
+    .cal-grid th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+    .cal-grid td { height: 110px; vertical-align: top; padding: 0.5rem; border-color: #e2e8f0; transition: background-color 0.2s; }
+    .cal-grid td:hover { background-color: #f8fafc; }
+    
+    /* Active Date Styling */
+    .cal-date-number { font-weight: 600; font-size: 0.85rem; color: #334155; display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; border-radius: 50%; }
+    .today-cell .cal-date-number { background-color: #2563eb; color: white; }
+
+    /* Calendar Event Badge */
+    .cal-event { 
+        background-color: #eff6ff; 
+        border: 1px solid #bfdbfe; 
+        border-left: 3px solid #3b82f6; 
+        border-radius: 6px; 
+        padding: 6px 8px; 
+        margin-top: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .cal-event:hover { transform: translateY(-1px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .cal-event-title { font-size: 0.75rem; font-weight: 700; color: #1d4ed8; font-family: monospace;}
+    .cal-event-time { font-size: 0.7rem; font-weight: 600; color: #64748b; }
+    .cal-event-desc { font-size: 0.7rem; color: #475569; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Timeline Hub - Clean & Elegant */
+    .timeline-container { position: relative; padding-left: 1.5rem; margin-top: 0.5rem; }
+    .timeline-line { position: absolute; left: 0.35rem; top: 1.5rem; bottom: 0; width: 2px; background-color: #e2e8f0; }
+    .timeline-item { position: relative; margin-bottom: 1.5rem; }
+    .timeline-node { position: absolute; left: -1.5rem; top: 0.7rem; width: 12px; height: 12px; border-radius: 50%; background-color: #3b82f6; border: 2px solid white; box-shadow: 0 0 0 2px #eff6ff; z-index: 2; }
+    
+    /* Accordion Card */
+    .run-card { border: 1px solid #e2e8f0; border-radius: 8px; background: white; transition: box-shadow 0.2s; }
+    .run-card-header { padding: 1rem; cursor: pointer; border-radius: 8px; }
+    .run-card-header:hover { background-color: #f8fafc; }
+    .run-badge { background-color: #f1f5f9; color: #334155; font-family: monospace; font-size: 0.75rem; font-weight: 600; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0; }
+    
+    /* Custom Form Modals */
+    .custom-form-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #64748b; letter-spacing: 0.02em; }
+    .custom-input { border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; padding: 0.6rem 0.75rem; }
+    .custom-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); outline: none; }
+</style>
+
+<div class="app-wrapper">
+    <%- include('../partials/headbar') %>
+    
+    <!-- MENGGUNAKAN APP-MAIN AGAR FULL WIDTH SEPERTI HALAMAN LAIN -->
+    <main class="app-main">
+        
+        <!-- Action Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Production Planning & Schedule</h4>
+                <p class="text-slate small mb-0">Master calendar for Cyclotron runs, target hospital allocations, and half-life tracking.</p>
+            </div>
+            <button class="btn fw-bold px-4 py-2 rounded-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#addBatchModal" style="background-color: #1e293b; color: white;">
+                <i class="bi bi-plus-lg text-warning me-2"></i>Add Production Batch
+            </button>
+        </div>
+
+        <div class="row g-4">
+            
+            <!-- KIRI: DYNAMIC CALENDAR ENGINE -->
+            <div class="col-xl-8 col-lg-7">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                    <div class="card-header bg-transparent border-0 pt-4 pb-3 px-4 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0 text-dark" id="calendarMonthYear">
+                            <!-- Diisi oleh Javascript -->
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-secondary fw-medium rounded-pill px-3" id="btnToday">Today</button>
+                            <div class="btn-group rounded-pill border">
+                                <button class="btn btn-sm btn-light px-3 border-0" id="btnPrevMonth"><i class="bi bi-chevron-left text-secondary"></i></button>
+                                <button class="btn btn-sm btn-light px-3 border-0 border-start" id="btnNextMonth"><i class="bi bi-chevron-right text-secondary"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-0 px-3 pb-3">
+                        <div class="table-responsive">
+                            <table class="table cal-grid mb-0" id="calendarTable">
+                                <thead>
+                                    <tr>
+                                        <th class="text-danger text-center">Sun</th>
+                                        <th class="text-center">Mon</th>
+                                        <th class="text-center">Tue</th>
+                                        <th class="text-center">Wed</th>
+                                        <th class="text-center">Thu</th>
+                                        <th class="text-center">Fri</th>
+                                        <th class="text-primary text-center">Sat</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="calendarGrid">
+                                    <!-- Diisi secara dinamis oleh Javascript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KANAN: UPCOMING RUNS HUB -->
+            <div class="col-xl-4 col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
+                    <div class="card-header bg-transparent border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+                        <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-clock-history text-primary me-2"></i>Upcoming Runs Hub</h6>
+                        <span class="badge bg-dark rounded-pill px-2 py-1"><%= typeof runs !== 'undefined' ? runs.length : 0 %> Active</span>
+                    </div>
+                    
+                    <div class="card-body p-4" style="overflow-y: auto; max-height: calc(100vh - 220px);">
+                        
+                        <div class="timeline-container">
+                            <div class="timeline-line"></div>
+                            
+                            <% if(typeof runs !== 'undefined' && runs.length > 0) { %>
+                                <% runs.forEach((run) => { 
+                                    let safeId = run.batch_number ? run.batch_number.replace(/[^a-zA-Z0-9]/g, '') : Math.random().toString(36).substring(7);
+                                    let displayTitle = run.item_code && run.item_code !== 'null' ? run.item_code : "Unnamed Product";
+                                    const dDate = new Date(run.production_date);
+                                    const formattedDate = dDate.toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+                                %>
+                                <div class="timeline-item">
+                                    <div class="timeline-node"></div>
+                                    <div class="run-card shadow-sm">
+                                        <!-- Accordion Header -->
+                                        <div class="run-card-header" data-bs-toggle="collapse" data-bs-target="#run-<%= safeId %>" aria-expanded="false" onclick="toggleChevron(this)">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="run-badge"><%= run.batch_number %></span>
+                                                <span class="small fw-bold text-success"><i class="bi bi-clock me-1"></i><%= run.calib_time %> WIB</span>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="fw-bold mb-0 text-dark fs-6"><%= displayTitle %></h6>
+                                                    <span class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-calendar2-event me-1"></i><%= formattedDate %></span>
+                                                </div>
+                                                <i class="bi bi-chevron-down text-muted chevron-icon" style="transition: transform 0.2s;"></i>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Accordion Body -->
+                                        <div class="collapse border-top" id="run-<%= safeId %>">
+                                            <div class="p-3 bg-light rounded-bottom">
+                                                <div class="row g-2 mb-3">
+                                                    <div class="col-6">
+                                                        <span class="custom-form-label d-block mb-1">Leadpot Container</span>
+                                                        <span class="fw-bold text-dark small"><i class="bi bi-shield-shaded text-primary me-1"></i> <%= run.leadpot || '-' %></span>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <span class="custom-form-label d-block mb-1">Condition</span>
+                                                        <span class="fw-bold text-dark small"><i class="bi bi-radioactive text-warning me-1"></i> Ambient/Shielded</span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="custom-form-label mb-2">Target Allocations & Activity</div>
+                                                <div class="d-flex flex-column gap-2">
+                                                    <% if(run.allocations && run.allocations.length > 0) { %>
+                                                        <% run.allocations.forEach(alloc => { %>
+                                                        <div class="d-flex justify-content-between align-items-center bg-white px-3 py-2 border rounded">
+                                                            <span class="text-dark small fw-medium"><i class="bi bi-hospital text-muted me-2"></i><%= alloc.customer_name %></span>
+                                                            <span class="badge bg-light text-dark border px-2 py-1"><%= alloc.activity %> mCi</span>
+                                                        </div>
+                                                        <% }) %>
+                                                    <% } else { %>
+                                                        <span class="text-muted small fst-italic">No allocations.</span>
+                                                    <% } %>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+                            <% } else { %>
+                                <div class="text-center py-4">
+                                    <p class="text-muted small mb-0">No scheduled runs found.<br>Add a batch to populate timeline.</p>
+                                </div>
+                            <% } %>
+                            
+                            <% if(typeof runs !== 'undefined' && runs.length > 0) { %>
+                                <div class="timeline-item mt-2">
+                                    <div class="timeline-node bg-secondary border-secondary"></div>
+                                    <div class="ms-3 text-muted small fst-italic pt-1">End of scheduled runs</div>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- MODAL: ADD PRODUCTION BATCH -->
+<div class="modal fade" id="addBatchModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-dark text-white border-bottom-0 py-3 px-4 rounded-top-4">
+                <h5 class="modal-title fw-bold fs-6"><i class="bi bi-plus-lg text-warning me-2"></i> Schedule Production Batch</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <form action="/production/schedule/add" method="POST">
+                <div class="modal-body p-4 bg-white">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label class="custom-form-label mb-1">Production Date</label>
+                            <input type="date" name="production_date" class="form-control custom-input" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="custom-form-label mb-1">Batch</label>
+                            <input type="text" name="batch_number" class="form-control custom-input" placeholder="e.g. FDG-260902" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="custom-form-label mb-1">Waktu Kalibrasi</label>
+                            <input type="time" name="calib_time" class="form-control custom-input" value="04:00" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="custom-form-label mb-1">Tujuan / Item Code</label>
+                            <!-- PENTING: name='item_code' agar cocok dengan backend DB -->
+                            <select name="item_code" id="selectTujuan" class="form-select custom-input" onchange="checkCustomTujuan(this)" required>
+                                <option value="" disabled selected>Select category...</option>
+                                <option value="Commercial 18F-FDG">Commercial 18F-FDG</option>
+                                <option value="Commercial 18F">Commercial 18F</option>
+                                <option value="Validation">Validation</option>
+                                <option value="Trial">Trial</option>
+                                <option value="Calibration">Calibration</option>
+                                <option value="Add New...">-- Add New Tujuan --</option>
+                            </select>
+                            <input type="text" name="item_code_custom" id="customTujuan" class="form-control custom-input mt-2" placeholder="Enter New Destination" style="display: none;" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="custom-form-label mb-1">Wadah Timbal (Leadpot)</label>
+                            <select name="leadpot" class="form-select custom-input" required>
+                                <option value="" disabled selected>Select container...</option>
+                                <option value="White-1">White-1</option><option value="White-2">White-2</option>
+                                <option value="White-3">White-3</option><option value="White-4">White-4</option>
+                                <option value="White-5">White-5</option><option value="White-6">White-6</option>
+                                <option value="White-7">White-7</option><option value="White-8">White-8</option>
+                                <option value="White-9">White-9</option><option value="White-10">White-10</option>
+                                <option value="White-11">White-11</option><option value="White-12">White-12</option>
+                                <option value="White-13">White-13</option><option value="White-14">White-14</option>
+                                <option value="White-15">White-15</option><option value="White-16">White-16</option>
+                                <option value="White-17">White-17</option><option value="White-18">White-18</option>
+                                <option value="White-19">White-19</option><option value="White-20">White-20</option>
+                                <option value="White-21">White-21</option><option value="White-22">White-22</option>
+                                <option value="White-23">White-23</option><option value="White-24">White-24</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="border rounded-3 p-3 bg-light">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="custom-form-label text-dark m-0"><i class="bi bi-hospital me-1"></i> Target Allocations</span>
+                            <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="addCustomerRow()"><i class="bi bi-plus"></i> Add Row</button>
+                        </div>
+                        <div id="allocationWrapper">
+                            <div class="allocation-row row g-2 mb-2">
+                                <div class="col-7">
+                                    <select name="customers" class="form-select custom-input" required>
+                                        <option value="" disabled selected>Select customer...</option>
+                                        <option value="Siloam Hospital SBY">Siloam Hospital SBY</option>
+                                        <option value="Ciputra Hospital SBY">Ciputra Hospital SBY</option>
+                                        <option value="Sardjito Hospital">Sardjito Hospital</option>
+                                        <option value="RS Mitra Plumbon">RS Mitra Plumbon</option>
+                                        <option value="RS Kariadi">RS Kariadi</option>
+                                        <option value="Quality Control Dept">Quality Control Dept</option>
+                                        <option value="PT Pharma Metrics Lab">PT Pharma Metrics Lab</option>
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <div class="input-group">
+                                        <input type="number" name="activities" class="form-control custom-input" placeholder="Act." required>
+                                        <span class="input-group-text bg-white border-secondary text-muted small">mCi</span>
+                                    </div>
+                                </div>
+                                <div class="col-1 text-center">
+                                    <button type="button" class="btn btn-outline-danger custom-input w-100 remove-row-btn" disabled><i class="bi bi-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light border-top-0 px-4 py-3 rounded-bottom-4">
+                    <button type="button" class="btn btn-light border fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark fw-bold px-4">Save Schedule</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. TANGKAP DATA DARI DATABASE (Via NodeJS)
+    const serverRuns = <%- JSON.stringify(typeof runs !== 'undefined' ? runs : []) %>;
+    
+    // 2. STATE AWAL KALENDER
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+    // 3. ENGINE KALENDER DINAMIS
+    function renderCalendar(month, year) {
+        document.getElementById("calendarMonthYear").innerHTML = `<i class="bi bi-calendar-event text-primary me-2"></i> ${monthNames[month]} ${year}`;
+        
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const daysInPrevMonth = new Date(year, month, 0).getDate();
+        const tbody = document.getElementById("calendarGrid");
+        tbody.innerHTML = ""; 
+
+        const today = new Date();
+        const isCurrentMonthYear = today.getMonth() === month && today.getFullYear() === year;
+
+        let dateCounter = 1;
+        let nextMonthDate = 1;
+
+        for (let i = 0; i < 6; i++) {
+            let row = document.createElement("tr");
+
+            for (let j = 0; j < 7; j++) {
+                let cell = document.createElement("td");
+                cell.className = "position-relative";
+
+                if (i === 0 && j < firstDay) {
+                    let prevDay = daysInPrevMonth - firstDay + j + 1;
+                    cell.innerHTML = `<span class="text-muted opacity-50">${prevDay}</span>`;
+                    cell.style.backgroundColor = '#f8fafc';
+                } else if (dateCounter > daysInMonth) {
+                    cell.innerHTML = `<span class="text-muted opacity-50">${nextMonthDate++}</span>`;
+                    cell.style.backgroundColor = '#f8fafc';
+                } else {
+                    let isToday = isCurrentMonthYear && dateCounter === today.getDate();
+                    if(isToday) cell.classList.add("today-cell");
+                    
+                    let cellContent = `<div class="d-flex justify-content-end mb-1"><span class="cal-date-number">${dateCounter}</span></div>`;
+
+                    // Pengecekan Aman Bebas Timezone
+                    const dayEvents = serverRuns.filter(r => {
+                        if(!r.production_date) return false;
+                        const dStr = r.production_date.split('T')[0]; // Ambil YYYY-MM-DD
+                        const [rYear, rMonth, rDay] = dStr.split('-');
+                        return parseInt(rYear) === year && (parseInt(rMonth) - 1) === month && parseInt(rDay) === dateCounter;
+                    });
+
+                    if (dayEvents.length > 0) {
+                        dayEvents.forEach(evt => {
+                            let displayTitle = evt.item_code && evt.item_code !== 'null' ? evt.item_code : 'Unnamed Product';
+                            let safeId = evt.batch_number ? evt.batch_number.replace(/[^a-zA-Z0-9]/g, '') : '';
+                            
+                            // Badge UI UX Profesional
+                            cellContent += `
+                                <div class="cal-event" data-bs-toggle="collapse" data-bs-target="#run-${safeId}">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="cal-event-title">${evt.batch_number}</span>
+                                        <span class="cal-event-time">${evt.calib_time}</span>
+                                    </div>
+                                    <div class="cal-event-desc">${displayTitle}</div>
+                                </div>
+                            `;
+                        });
+                    }
+                    cell.innerHTML = cellContent;
+                    dateCounter++;
+                }
+                row.appendChild(cell);
+            }
+            tbody.appendChild(row);
+            if (dateCounter > daysInMonth && i >= 4) break; 
+        }
+    }
+
+    // 4. INIT TOMBOL NAVIGASI
+    document.addEventListener("DOMContentLoaded", () => {
+        renderCalendar(currentMonth, currentYear);
+
+        document.getElementById('btnPrevMonth').addEventListener('click', () => {
+            currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+            renderCalendar(currentMonth, currentYear);
+        });
+        document.getElementById('btnNextMonth').addEventListener('click', () => {
+            currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+            renderCalendar(currentMonth, currentYear);
+        });
+        document.getElementById('btnToday').addEventListener('click', () => {
+            const now = new Date(); currentMonth = now.getMonth(); currentYear = now.getFullYear();
+            renderCalendar(currentMonth, currentYear);
+        });
+    });
+
+    // 5. HELPER: Animasi Chevron Accordion
+    function toggleChevron(el) {
+        const icon = el.querySelector('.chevron-icon');
+        if(icon) {
+            const isExpanded = el.getAttribute('aria-expanded') === 'true';
+            icon.style.transform = isExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
+    }
+
+    // 6. HELPER: Form Tujuan Custom
+    function checkCustomTujuan(selectEl) {
+        const customInput = document.getElementById('customTujuan');
+        if (selectEl.value === 'Add New...') {
+            customInput.style.display = 'block';
+            customInput.disabled = false;
+            customInput.required = true;
+            // Clear standard item_code name attribute so the custom one is submitted
+            selectEl.removeAttribute('name');
+        } else {
+            customInput.style.display = 'none';
+            customInput.disabled = true;
+            customInput.required = false;
+            selectEl.setAttribute('name', 'item_code');
+        }
+    }
+
+    // 7. HELPER: Form Multi-Customer Target
+    function addCustomerRow() {
+        const wrapper = document.getElementById('allocationWrapper');
+        const newRow = document.createElement('div');
+        newRow.className = 'allocation-row row g-2 mb-2';
+        newRow.innerHTML = `
+            <div class="col-7">
+                <select name="customers" class="form-select custom-input" required>
+                    <option value="" disabled selected>Select customer...</option>
+                    <option value="Siloam Hospital SBY">Siloam Hospital SBY</option>
+                    <option value="Ciputra Hospital SBY">Ciputra Hospital SBY</option>
+                    <option value="Sardjito Hospital">Sardjito Hospital</option>
+                    <option value="RS Mitra Plumbon">RS Mitra Plumbon</option>
+                    <option value="RS Kariadi">RS Kariadi</option>
+                    <option value="Quality Control Dept">Quality Control Dept</option>
+                    <option value="PT Pharma Metrics Lab">PT Pharma Metrics Lab</option>
+                </select>
+            </div>
+            <div class="col-4">
+                <div class="input-group">
+                    <input type="number" name="activities" class="form-control custom-input" placeholder="Act." required>
+                    <span class="input-group-text bg-white border-secondary text-muted small">mCi</span>
+                </div>
+            </div>
+            <div class="col-1 text-center">
+                <button type="button" class="btn btn-outline-danger custom-input w-100 remove-row-btn" onclick="this.closest('.allocation-row').remove(); updateRemoveBtns();"><i class="bi bi-trash"></i></button>
+            </div>
+        `;
+        wrapper.appendChild(newRow);
+        updateRemoveBtns();
+    }
+
+    function updateRemoveBtns() {
+        const rows = document.querySelectorAll('.allocation-row');
+        rows.forEach(row => {
+            row.querySelector('.remove-row-btn').disabled = (rows.length === 1);
+        });
+    }
+</script>
+
+<%- include('../partials/footer') %>

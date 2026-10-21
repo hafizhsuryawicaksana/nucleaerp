@@ -1,0 +1,77 @@
+<%- include('partials/header', { title: 'Hasil Pencarian - Nuclea ERP' }) %>
+<%- include('partials/sidebar') %>
+
+<div class="app-wrapper">
+    <%- include('partials/headbar') %>
+    
+    <main class="app-main">
+        <div class="container-fluid">
+            
+            <div class="mb-4">
+                <h4 class="fw-bold text-dark mb-1">Search Results for: "<span class="text-warning"><%= query %></span>"</h4>
+                <p class="text-muted small">Showing materials and assets matching the search.</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Hasil Material -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom pt-4 pb-3">
+                            <h6 class="card-title fw-bold m-0"><i class="bi bi-box-seam me-2 text-primary"></i> Data Material (<%= materials.length %>)</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <% if (materials.length > 0) { %>
+                                    <% materials.forEach(m => { %>
+                                        <li class="list-group-item p-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <div class="fw-bold text-dark"><%= m.name %></div>
+                                                    <div class="small text-muted"><%= m.material_code %> | Category: <%= m.category %></div>
+                                                </div>
+                                                <span class="badge bg-light text-dark border">Stok: <%= m.current_stock %> <%= m.uom %></span>
+                                            </div>
+                                        </li>
+                                    <% }) %>
+                                <% } else { %>
+                                    <li class="list-group-item p-4 text-center text-muted small">No matching materials.</li>
+                                <% } %>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hasil Asset -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white border-bottom pt-4 pb-3">
+                            <h6 class="card-title fw-bold m-0"><i class="bi bi-shield-shaded me-2 text-warning"></i> Asset Data (<%= assets.length %>)</h6>
+                        </div>
+                        <div class="card-body p-0">
+                            <ul class="list-group list-group-flush">
+                                <% if (assets.length > 0) { %>
+                                    <% assets.forEach(a => { %>
+                                        <li class="list-group-item p-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <div class="fw-bold text-dark"><%= a.name %></div>
+                                                    <div class="small text-muted"><%= a.asset_code %> | <%= a.category %></div>
+                                                </div>
+                                                <span class="badge <%= a.status === 'AVAILABLE' ? 'bg-success' : 'bg-warning' %>"><%= a.status %></span>
+                                            </div>
+                                        </li>
+                                    <% }) %>
+                                <% } else { %>
+                                    <li class="list-group-item p-4 text-center text-muted small">No matching assets.</li>
+                                <% } %>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+
+<%- include('partials/footer') %>

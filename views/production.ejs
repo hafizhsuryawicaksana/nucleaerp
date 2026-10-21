@@ -1,0 +1,251 @@
+<%- include('partials/header', { title: 'Production Order | Nuclea ERP - PT IMS' }) %>
+
+<%- include('partials/sidebar', { page: 'production' }) %>
+
+<div class="app-wrapper">
+    <%- include('partials/headbar') %>
+    
+    <main class="app-main">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Production Order & Execution</h4>
+                <span class="text-muted small">18F-FDG Synthesis Batch Tracking & BOM Deduction</span>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-light-warning text-warning fw-bold bg-warning bg-opacity-10 border border-warning border-opacity-25" data-bs-toggle="modal" data-bs-target="#simulatorModal">
+                    <i class="bi bi-calculator me-1"></i> EOB Simulator
+                </button>
+                <button class="btn btn-sm btn-dark fw-bold" data-bs-toggle="modal" data-bs-target="#launchProductionModal">
+                    <i class="bi bi-rocket-takeoff me-1"></i> Launch New Batch
+                </button>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-card-checklist text-primary me-2"></i> Today's Production Orders</h6>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light text-muted small text-uppercase">
+                            <tr>
+                                <th class="ps-4">Batch ID</th>
+                                <th>Run Parameters</th>
+                                <th>Manager Approval</th>
+                                <th>Prod. Status</th>
+                                <th class="pe-4 text-end">Action / Yield</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (typeof batches !== 'undefined' && batches.length > 0) { %>
+                                <% batches.forEach(batch => { %>
+                                <tr>
+                                    <td class="ps-4 fw-bold text-primary"><%= batch.batch_id %></td>
+                                    <td>
+                                        <span class="d-block small text-muted">Env: <%= batch.env_temp %>°C | <%= batch.env_pressure %> Pa</span>
+                                        <span class="d-block small text-muted">Beam: <%= batch.beam_current_ua %> µA / <%= batch.beam_duration_min %> Min</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1"><i class="bi bi-check2-all me-1"></i> Approved</span>
+                                    </td>
+                                    <td>
+                                        <% if(batch.status === 'IN_PROGRESS') { %>
+                                            <span class="badge bg-warning text-dark px-3 py-2 fw-bold">IN PROGRESS</span>
+                                        <% } else { %>
+                                            <span class="badge bg-success px-3 py-2 fw-bold">COMPLETED</span>
+                                        <% } %>
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        <% if(batch.status === 'IN_PROGRESS') { %>
+                                            <button class="btn btn-sm btn-success fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#completeModal<%= batch.id %>">
+                                                <i class="bi bi-check2-circle"></i> Input QC & Yield
+                                            </button>
+                                        <% } else { %>
+                                            <span class="fw-bolder text-dark fs-6"><%= batch.raw_yield_mci %> <span class="text-muted fw-normal fs-7">mCi</span></span>
+                                        <% } %>
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="completeModal<%= batch.id %>" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content border-0 shadow-lg">
+                                            <div class="modal-header bg-success text-white">
+                                                <h5 class="modal-title fw-bold">QC Clearance & Yield - <%= batch.batch_id %></h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form action="/complete-production/<%= batch.id %>" method="POST">
+                                                <div class="modal-body p-4 bg-light text-start">
+                                                    <div class="row g-3">
+                                                        <div class="col-12">
+                                                            <label class="form-label small fw-bold text-muted text-uppercase">Actual EOB (End of Bombardment)</label>
+                                                            <input type="datetime-local" name="actual_eob" class="form-control" required>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <label class="form-label small fw-bold text-muted text-uppercase">Raw Yield (mCi)</label>
+                                                            <input type="number" step="0.1" name="raw_yield_mci" class="form-control" placeholder="Total aktivitas dalam mCi" required>
+                                                        </div>
+                                                        <hr class="my-3 border-dashed">
+                                                        <h6 class="fw-bold text-dark mb-2">Quality Control (QC) Parameters</h6>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label small fw-bold text-muted">pH Level</label>
+                                                            <input type="number" step="0.1" name="qc_ph" class="form-control" placeholder="4.5 - 8.5" required>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label small fw-bold text-muted">Purity (%)</label>
+                                                            <input type="number" step="0.1" name="qc_purity" class="form-control" placeholder="> 95%" required>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label small fw-bold text-muted">Sterility</label>
+                                                            <select name="qc_sterility" class="form-select" required>
+                                                                <option value="PASS">PASS</option>
+                                                                <option value="FAIL">FAIL</option>
+                                                                <option value="PENDING">PENDING</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-success fw-bold w-100">SUBMIT & COMPLETE BATCH</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-50"></i>
+                                        No production batches found. Launch a new batch to start.
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div class="modal fade" id="simulatorModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light border-bottom">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-cpu text-warning me-2"></i> EOB & Backward-Decay Simulator</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Target Hospital Orders</label>
+                        <select class="form-select" multiple style="height: 120px;">
+                            <option selected>RS Mitra Plumbon (Target: 400 mCi @ 08:00)</option>
+                            <option selected>RS Indriati (Target: 300 mCi @ 09:00)</option>
+                        </select>
+                        <small class="text-muted mt-1 d-block">Hold Ctrl/Cmd to select multiple</small>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded border h-100">
+                            <span class="d-block small text-muted mb-2">Governing Backward Formula:</span>
+                            <span class="fw-bold text-primary fs-5">$$A_0 = A_t / e^{-0.00631 t}$$</span>
+                            <hr class="border-dashed">
+                            <span class="d-block small text-muted">Recommended EOB: <strong class="text-dark">04:30 WIB</strong></span>
+                            <span class="d-block small text-muted">Required $\mu A$: <strong class="text-dark">40 $\mu A$</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="launchProductionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-shield-check text-warning me-2"></i> Production Order & BOM Deduction</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="/execute-production" method="POST">
+                <div class="modal-body p-4 bg-light">
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Batch Number</label>
+                            <input type="text" name="batch_id" class="form-control fw-bold text-primary bg-white" value="FDG-<%= new Date().toISOString().slice(0,10).replace(/-/g,'') %>-01" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Operator</label>
+                            <input type="text" class="form-control bg-white text-muted" value="<%= user.full_name %>" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Manager Approval</label>
+                            <input type="text" class="form-control bg-success bg-opacity-10 text-success fw-bold border-success border-opacity-25" value="APPROVED" readonly>
+                        </div>
+
+                        <div class="col-12">
+                            <h6 class="fw-bold text-dark mt-2 mb-3 border-bottom pb-2">Bill of Material (BOM) per Batch</h6>
+                            <div class="p-3 bg-white rounded border border-warning">
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" name="cassette_verify" id="cassetteVerify" required>
+                                    <label class="form-check-label fw-medium small" for="cassetteVerify">
+                                        Deduct 1 unit of <span class="fw-bold text-dark">Fastlab Single Cassette (RM-001)</span>
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch mb-2">
+                                    <input class="form-check-input" type="checkbox" required checked disabled>
+                                    <label class="form-check-label fw-medium small text-muted">
+                                        Deduct 1 vial of <span class="fw-bold">Precursor Mannose Triflate</span> (Auto-deduct)
+                                    </label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" required checked disabled>
+                                    <label class="form-check-label fw-medium small text-muted">
+                                        Deduct 2.5 ml of <span class="fw-bold">18O Enriched Water</span> (Auto-deduct)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Beam Current ($\mu A$)</label>
+                            <input type="number" step="0.1" name="beam_current_ua" class="form-control" placeholder="e.g. 40" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Beam Duration (Min)</label>
+                            <input type="number" name="beam_duration_min" class="form-control" placeholder="e.g. 120" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Cleanroom Temp (°C)</label>
+                            <input type="number" step="0.1" name="env_temp" class="form-control" placeholder="e.g. 20.5" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Diff. Pressure (Pa)</label>
+                            <input type="number" name="env_pressure" class="form-control" placeholder="e.g. 15" required>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="d-flex gap-4 border-top pt-3 mt-2">
+                                <div class="form-check">
+                                    <input class="form-check-input border-dark" type="checkbox" required>
+                                    <label class="form-check-label fw-bold small text-dark">Vacuum Status OK</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input border-dark" type="checkbox" required>
+                                    <label class="form-check-label fw-bold small text-dark">Target Temp OK</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white">
+                    <button type="submit" class="btn btn-dark fw-bold px-4 w-100">AUTHORIZE & LAUNCH BATCH</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer') %>
